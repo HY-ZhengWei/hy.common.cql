@@ -1,4 +1,4 @@
-package org.hy.common.cql.junit;
+package org.hy.common.xcql.junit;
 
 import org.hy.common.Help;
 import org.hy.common.xml.log.Logger;

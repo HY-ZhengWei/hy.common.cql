@@ -1,4 +1,4 @@
-# hy.common.cql
+# hy.common.xcql
 
 
 

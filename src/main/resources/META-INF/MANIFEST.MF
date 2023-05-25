@@ -1,6 +1,6 @@
 Manifest-Version: 1.0.0
 Created-By: HY.ZhengWei@qq.com  2023
 Specification-Version: 1.0.0  2023-05-24
-SourceCode: https://github.com/HY-ZhengWei/hy.common.cql
-SourceCodeChina: https://gitee.com/HY-ZhengWei/hy.common.cql
+SourceCode: https://github.com/HY-ZhengWei/hy.common.xcql
+SourceCodeChina: https://gitee.com/HY-ZhengWei/hy.common.xcql
 Build-JDK: 11

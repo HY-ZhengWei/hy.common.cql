@@ -6,7 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="hy.common.cql" />
+        <module name="hy.common.xcql" />
       </profile>
     </annotationProcessing>
   </component>

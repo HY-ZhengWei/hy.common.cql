@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cn.openapis</groupId>
-    <artifactId>hy.common.cql</artifactId>
+    <artifactId>hy.common.xcql</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>cn.openapis.hy.common.cql</name>
-    <!-- https://gitee.com/HY-ZhengWei/hy.common.cql -->
-    <url>https://github.com/HY-ZhengWei/hy.common.cql</url>
-    <description>cn.openapis.hy.common.cql</description>
+    <name>cn.openapis.hy.common.xcql</name>
+    <!-- https://gitee.com/HY-ZhengWei/hy.common.xcql -->
+    <url>https://github.com/HY-ZhengWei/hy.common.xcql</url>
+    <description>cn.openapis.hy.common.xcql</description>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -88,9 +88,9 @@
 
     <scm>
         <tag>master</tag>
-        <url>git@github.com:HY-ZhengWei/hy.common.cql.git</url>
-        <connection>git@github.com:HY-ZhengWei/hy.common.cql.git</connection>
-        <developerConnection>git@github.com:HY-ZhengWei/hy.common.cql.git</developerConnection>
+        <url>git@github.com:HY-ZhengWei/hy.common.xcql.git</url>
+        <connection>git@github.com:HY-ZhengWei/hy.common.xcql.git</connection>
+        <developerConnection>git@github.com:HY-ZhengWei/hy.common.xcql.git</developerConnection>
     </scm>
 
     <build>

@@ -93,13 +93,20 @@
                 <directory>src/main/java</directory>
                 <filtering>true</filtering>
                 <includes>
+                    <include>**/LICENSE</include>
                     <include>**/*.xml</include>
                     <include>**/*.html</include>
                     <include>**/*.txt</include>
                     <include>**/*.ini</include>
+                    <include>**/*.json</include>
+                    <include>**/*.properties</include>
+                    <include>**/*.md</include>
+                    <include>**/*.MF</include>
                     <include>**/*.js</include>
                     <include>**/*.css</include>
+                    <include>**/*.map</include>
                     <include>**/*.png</include>
+                    <include>**/*.gif</include>
                     <include>**/*.eot</include>
                     <include>**/*.svg</include>
                     <include>**/*.ttf</include>

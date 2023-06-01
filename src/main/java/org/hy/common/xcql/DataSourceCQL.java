@@ -161,13 +161,18 @@ public class DataSourceCQL implements Comparable<DataSourceCQL> ,XJavaID ,Serial
         {
             v_Session = this.driver.session(this.config);
             
-            this.connActiveCount++;
-            if ( this.connActiveCount > this.connMaxUseCount )
+            if ( v_Session != null )
             {
-                this.connMaxUseCount = this.connActiveCount;
+                this.connActiveCount++;
+                if ( this.connActiveCount > this.connMaxUseCount )
+                {
+                    this.connMaxUseCount = this.connActiveCount;
+                }
+                this.isException  = false;
+                this.connLastTime = new Date();
+                
+                return new Connection(v_Session ,this);
             }
-            this.isException  = false;
-            this.connLastTime = new Date();
         }
         catch (Exception exce)
         {
@@ -176,7 +181,7 @@ public class DataSourceCQL implements Comparable<DataSourceCQL> ,XJavaID ,Serial
             throw exce;
         }
         
-        return v_Session;
+        return null;
     }
     
     

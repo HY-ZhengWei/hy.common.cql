@@ -1,5 +1,7 @@
 package org.hy.common.xcql.junit;
 
+import java.util.List;
+
 import org.hy.common.Help;
 import org.hy.common.xcql.DataSourceCQL;
 import org.hy.common.xml.log.Logger;
@@ -11,6 +13,7 @@ import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.SessionConfig;
+import org.neo4j.driver.Value;
 
 
 
@@ -36,14 +39,34 @@ public class JU_Neo4j
         SessionConfig v_SessionConfig = SessionConfig.forDatabase("cdc");
         Session       v_Session       = v_Driver.session(v_SessionConfig);
         
-        Result v_Result = v_Session.run("MATCH (n:`数据源`) RETURN n");
+        Result v_Result = v_Session.run("MATCH (n:`数据源`) ,(r:`源端表`) RETURN n.id ,r.id AS id2");
+        // 遍历每条记录
         while (v_Result.hasNext())
         {
-            Record v_Record = v_Result.next();
+            Record       v_Record = v_Result.next();
+            List<String> v_RNames = v_Record.keys();
             
-            Help.print(v_Record.keys());
+            // 遍历每条记录中的每个数据子集
+            for (String v_RName : v_RNames)
+            {
+                Value            v_RData      = v_Record.get(v_RName);
+                Iterable<String> v_FieldNames = v_RData.keys();
+                boolean          v_IsEmpty    = true;
+                
+                // 遍历节点属性
+                for (String v_FieldName : v_FieldNames)
+                {
+                    $Logger.info(v_FieldName + " = " + v_RData.get(v_FieldName ,""));
+                    v_IsEmpty = false;
+                }
+                
+                if ( v_IsEmpty )
+                {
+                    $Logger.info(v_RName + " = " + v_RData.asString());
+                }
+            }
             
-            $Logger.info(v_Record.get("n").get("xid"));
+            // $Logger.info(v_Record.get("n").get("xid"));
         }
         v_Session.close();
         v_Driver.close();

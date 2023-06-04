@@ -188,19 +188,6 @@ public final class XCQLResult
     
     
     /**
-     * 将数据库结果集转化为Java实例对象
-     * 
-     * @param i_Result
-     * @return
-     */
-    public XCQLData getDatas(Result i_Result)
-    {
-        return this.getDatas(i_Result ,0 ,0);
-    }
-    
-    
-    
-    /**
      * 将数据库结果集转化为Java实例对象前，先解释元数据。
      * 
      * @author      ZhengWei(HY)
@@ -220,6 +207,19 @@ public final class XCQLResult
     
     
     /**
+     * 将数据库结果集转化为Java实例对象
+     * 
+     * @param i_Result
+     * @return
+     */
+    public XCQLData getDatas(Result i_Result)
+    {
+        return this.getDatas(i_Result ,0 ,0);
+    }
+    
+    
+    
+    /**
      * 将数据库结果集转化为Java实例对象(私有的)
      * 
      * @param i_Result
@@ -228,7 +228,7 @@ public final class XCQLResult
      * @return
      */
     @SuppressWarnings("unchecked")
-    private XCQLData getDatas(Result i_Result
+    public XCQLData getDatas(Result i_Result
                              ,int    i_StartRow
                              ,int    i_PagePerSize)
     {

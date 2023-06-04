@@ -2,8 +2,6 @@ package org.hy.common.xcql.junit;
 
 import java.util.List;
 
-import org.hy.common.Help;
-import org.hy.common.xcql.DataSourceCQL;
 import org.hy.common.xml.log.Logger;
 import org.junit.Test;
 import org.neo4j.driver.AuthTokens;
@@ -75,27 +73,39 @@ public class JU_Neo4j
     
     
     @Test
-    public void test_DBCQL()
+    public void test_Neo4j_002()
     {
-        DataSourceCQL v_DSCQL = new DataSourceCQL();
+        Driver        v_Driver        = GraphDatabase.driver("neo4j://127.0.0.1:7687" ,AuthTokens.basic("neo4j", "ZhengWei@qq.com"));
+        SessionConfig v_SessionConfig = SessionConfig.forDatabase("cdc");
+        Session       v_Session       = v_Driver.session(v_SessionConfig);
         
-        v_DSCQL.setUrl("neo4j://127.0.0.1:7687");
-        v_DSCQL.setUsername("neo4j");
-        v_DSCQL.setPassword("ZhengWei@qq.com");
-        v_DSCQL.setDatabase("cdc");
+        Result v_Result          = v_Session.run("CREATE (:测试 {name: '测试01'})");
+        int    v_CreateNodeCount = v_Result.consume().counters().nodesCreated();
+        int    v_SetCount        = v_Result.consume().counters().propertiesSet();
         
-        Session v_Session = v_DSCQL.getConnection();
+        $Logger.info("创建节点数量：" + v_CreateNodeCount);
+        $Logger.info("设置属性数量：" + v_SetCount);
         
-        Result v_Result = v_Session.run("MATCH (n:`数据源`) RETURN n");
-        while (v_Result.hasNext())
-        {
-            Record v_Record = v_Result.next();
-            
-            Help.print(v_Record.keys());
-            
-            $Logger.info(v_Record.get("n").get("xid"));
-        }
         v_Session.close();
+        v_Driver.close();
+    }
+    
+    
+    
+    @Test
+    public void test_Neo4j_003()
+    {
+        Driver        v_Driver        = GraphDatabase.driver("neo4j://127.0.0.1:7687" ,AuthTokens.basic("neo4j", "ZhengWei@qq.com"));
+        SessionConfig v_SessionConfig = SessionConfig.forDatabase("cdc");
+        Session       v_Session       = v_Driver.session(v_SessionConfig);
+        
+        Result v_Result   = v_Session.run("MATCH (n:测试) WHERE n.name = '测试01' SET n.age = 18");
+        int    v_SetCount = v_Result.consume().counters().propertiesSet();
+        
+        $Logger.info("设置属性数量：" + v_SetCount);
+        
+        v_Session.close();
+        v_Driver.close();
     }
     
 }

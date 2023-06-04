@@ -230,6 +230,18 @@ public class DataSourceCQL implements Comparable<DataSourceCQL> ,XJavaID ,Serial
     
     
     /**
+     * 数据库连接池组中，是否有可用的数据库池
+     * 
+     * @return
+     */
+    public boolean isValid()
+    {
+        return true;
+    }
+    
+    
+    
+    /**
      * 获取：是否出现异常。非连接断连异常也会为true
      */
     public boolean isException()

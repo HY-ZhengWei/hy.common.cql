@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 import org.hy.common.Date;
 import org.hy.common.Help;
 import org.neo4j.driver.Result;
-import org.neo4j.driver.Session;
 
 
 
@@ -95,7 +94,7 @@ public class XCQLOPQuery
      * @param i_Conn
      * @return
      */
-    public static XCQLData queryXCQLData(final XCQL i_XCQL ,final Session i_Conn)
+    public static XCQLData queryXCQLData(final XCQL i_XCQL ,final Connection i_Conn)
     {
         i_XCQL.checkContent();
         
@@ -209,7 +208,7 @@ public class XCQLOPQuery
      * @param i_Conn
      * @return
      */
-    public static XCQLData queryXCQLData(final XCQL i_XCQL ,final Map<String ,?> i_Values ,final Session i_Conn)
+    public static XCQLData queryXCQLData(final XCQL i_XCQL ,final Map<String ,?> i_Values ,final Connection i_Conn)
     {
         i_XCQL.checkContent();
         
@@ -324,7 +323,7 @@ public class XCQLOPQuery
      * @param i_Conn
      * @return
      */
-    public static XCQLData queryXCQLData(final XCQL i_XCQL ,final Object i_Obj ,final Session i_Conn)
+    public static XCQLData queryXCQLData(final XCQL i_XCQL ,final Object i_Obj ,final Connection i_Conn)
     {
         i_XCQL.checkContent();
         
@@ -380,7 +379,7 @@ public class XCQLOPQuery
      * @param i_CQL              常规CQL语句
      * @return
      */
-    public static XCQLData queryXCQLData(final XCQL i_XCQL ,final String i_CQL ,final Session i_Conn)
+    public static XCQLData queryXCQLData(final XCQL i_XCQL ,final String i_CQL ,final Connection i_Conn)
     {
         i_XCQL.checkContent();
         
@@ -482,7 +481,7 @@ public class XCQLOPQuery
      * @param i_CQL              常规CQL语句
      * @return
      */
-    private static XCQLData queryXCQLData_Inner(final XCQL i_XCQL ,final String i_CQL ,final Session i_Conn)
+    private static XCQLData queryXCQLData_Inner(final XCQL i_XCQL ,final String i_CQL ,final Connection i_Conn)
     {
         Result v_Resultset = null;
         long   v_BeginTime = i_XCQL.request().getTime();
@@ -501,7 +500,7 @@ public class XCQLOPQuery
             
             if ( null == i_Conn)
             {
-                throw new NullPointerException("Session is null of XCQL.");
+                throw new NullPointerException("Connection is null of XCQL.");
             }
             
             v_Resultset = i_Conn.run(i_CQL);
@@ -771,9 +770,9 @@ public class XCQLOPQuery
      */
     private static XCQLData queryXCQLData_Inner(final XCQL i_XCQL ,final String i_CQL ,final DataSourceCQL i_DSCQL ,final int i_StartRow ,final int i_PagePerSize)
     {
-        Session v_Conn      = null;
-        Result  v_Resultset = null;
-        long    v_BeginTime = i_XCQL.request().getTime();
+        Connection v_Conn      = null;
+        Result     v_Resultset = null;
+        long       v_BeginTime = i_XCQL.request().getTime();
         
         try
         {
@@ -831,9 +830,9 @@ public class XCQLOPQuery
      */
     private static XCQLData queryXCQLData_Inner(final XCQL i_XCQL ,final String i_CQL ,final DataSourceCQL i_DSCQL)
     {
-        Session v_Conn      = null;
-        Result  v_Resultset = null;
-        long    v_BeginTime = i_XCQL.request().getTime();
+        Connection v_Conn      = null;
+        Result     v_Resultset = null;
+        long       v_BeginTime = i_XCQL.request().getTime();
         
         try
         {
@@ -1104,10 +1103,10 @@ public class XCQLOPQuery
      */
     private static long queryCQLCount_Inner(final XCQL i_XCQL ,final String i_CQL ,final DataSourceCQL i_DSCQL)
     {
-        Session v_Conn      = null;
-        Result  v_Resultset = null;
-        long    v_CQLCount  = 0;
-        long    v_BeginTime = i_XCQL.request().getTime();
+        Connection v_Conn      = null;
+        Result     v_Resultset = null;
+        long       v_CQLCount  = 0;
+        long       v_BeginTime = i_XCQL.request().getTime();
         
         try
         {
@@ -1399,10 +1398,10 @@ public class XCQLOPQuery
      */
     private static Object queryCQLValue_Inner(final XCQL i_XCQL ,final String i_CQL ,final DataSourceCQL i_DSCQL)
     {
-        Session v_Conn      = null;
-        Result  v_Resultset = null;
-        Object  v_CQLValue  = null;
-        long    v_BeginTime = i_XCQL.request().getTime();
+        Connection v_Conn      = null;
+        Result     v_Resultset = null;
+        Object     v_CQLValue  = null;
+        long       v_BeginTime = i_XCQL.request().getTime();
 
         
         try

@@ -148,7 +148,7 @@ public class DataSourceCQL implements Comparable<DataSourceCQL> ,XJavaID ,Serial
      *
      * @return
      */
-    public synchronized Session getConnection()
+    public synchronized Connection getConnection()
     {
         if ( this.config == null )
         {

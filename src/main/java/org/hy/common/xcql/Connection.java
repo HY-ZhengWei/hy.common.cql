@@ -2,6 +2,7 @@ package org.hy.common.xcql;
 
 import java.util.Map;
 
+import org.hy.common.xml.log.Logger;
 import org.neo4j.driver.Bookmark;
 import org.neo4j.driver.Query;
 import org.neo4j.driver.Record;
@@ -18,6 +19,9 @@ import org.neo4j.driver.Value;
 
 /**
  * 将第三方的Connection对象二次封装，统一监控接口
+ * 
+ * 限制：
+ *   同一连接，同时仅能开启一个事物
  *
  * @author      ZhengWei(HY)
  * @createDate  2017-07-13
@@ -25,12 +29,18 @@ import org.neo4j.driver.Value;
  */
 public class Connection implements Session
 {
+    private static final Logger $Logger = new Logger(Connection.class ,true);
+    
+    
     
     /** 所属的数据库连接信息 */
     private DataSourceCQL       dataSourceCQL;
     
     /** 第三方的连接对象实例 */
     private Session             conn;
+    
+    /** 第三方的连接开启的事务 */
+    private Transaction         transaction;
     
     
     
@@ -63,9 +73,35 @@ public class Connection implements Session
     
     
     @Override
-    public void close()
+    public synchronized void close()
     {
-        this.conn.close();
+        try
+        {
+            if ( this.transaction != null )
+            {
+                if ( this.transaction.isOpen() )
+                {
+                    this.transaction.close();
+                }
+            }
+        }
+        catch (Exception exce)
+        {
+            $Logger.error(exce);
+        }
+        finally
+        {
+            this.transaction = null;
+        }
+        
+        try
+        {
+            this.conn.close();
+        }
+        catch (Exception exce)
+        {
+            $Logger.error(exce);
+        }
         
         if ( this.dataSourceCQL != null )
         {
@@ -124,17 +160,39 @@ public class Connection implements Session
 
 
     @Override
-    public Transaction beginTransaction()
+    public synchronized Transaction beginTransaction()
     {
-        return this.conn.beginTransaction();
+        if ( this.transaction != null )
+        {
+            if ( !this.transaction.isOpen() )
+            {
+                this.transaction = this.conn.beginTransaction();
+            }
+        }
+        else
+        {
+            this.transaction = this.conn.beginTransaction();
+        }
+        return this.transaction;
     }
 
 
 
     @Override
-    public Transaction beginTransaction(TransactionConfig config)
+    public synchronized Transaction beginTransaction(TransactionConfig config)
     {
-        return this.conn.beginTransaction(config);
+        if ( this.transaction != null )
+        {
+            if ( !this.transaction.isOpen() )
+            {
+                this.transaction = this.conn.beginTransaction(config);
+            }
+        }
+        else
+        {
+            this.transaction = this.conn.beginTransaction(config);
+        }
+        return this.transaction;
     }
 
 

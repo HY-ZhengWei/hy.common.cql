@@ -16,13 +16,11 @@ import org.hy.common.StringHelp;
 import org.hy.common.TablePartitionBusway;
 import org.hy.common.XJavaID;
 import org.hy.common.xml.XCQLOPDDL;
-import org.hy.common.xml.XCQLOPInsert;
 import org.hy.common.xml.XCQLOPUpdate;
 import org.hy.common.xml.XJava;
 import org.hy.common.xml.log.Logger;
 import org.hy.common.xml.plugins.XRule;
 import org.neo4j.driver.Result;
-import org.neo4j.driver.Session;
 
 
 
@@ -136,6 +134,14 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
      * C: DML创建表，创建对象等
      */
     private String                         type;
+    
+    /**
+     * 批量执行 Insert、Update、Delete 时，达到提交的提交点
+     * 
+     * 当>=1时，才有效，即分次提交
+     * 当<=0时，在一个事务中执行所有的操作(默认状态)
+     */
+    private int                            batchCommit;
     
     /**
      * 是否允许或支持execute()方法中执行多条CQL语句，即$Executes_Split = ";/"分割符是否生效。
@@ -342,7 +348,7 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
         {
             XCQL v_XCQL = v_XCQLTrigger.getXcql();
             
-            if ( Help.isNull(v_XCQL.getContentDB().getCQLText()) )
+            if ( Help.isNull(v_XCQL.getContentDB().getCqlText()) )
             {
                 v_XCQL.setXJavaID(    Help.NVL(this.getXJavaID()) + "_" + Date.getNowTime().getFullMilli_ID());
                 v_XCQL.setContentDB(  this.getContentDB());
@@ -350,12 +356,11 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
                 v_XCQL.setType(       this.getType());
                 v_XCQL.setDomain(     this.getDomain());
                 v_XCQL.setBatchCommit(this.getBatchCommit());
-                v_XCQL.setBlobSafe(   this.isBlobSafe());
                 
                 XJava.putObject(v_XCQL.getXJavaID() ,v_XCQL);
             }
             
-            if ( v_XCQL.getContentDB().getCQLText().indexOf(";/") >= 0 )
+            if ( v_XCQL.getContentDB().getCqlText().indexOf(";/") >= 0 )
             {
                 v_XCQLTrigger.setExecuteType(XCQLTrigger.$Execute);
             }
@@ -1147,84 +1152,6 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
     
     
     /**
-     * 一行数据的批量执行：占位符CQL的Insert语句的执行。
-     * 
-     * 1. 按集合 Map<String ,Object> 填充占位符CQL，生成可执行的CQL语句；
-     * 
-     * @author      ZhengWei(HY)
-     * @createDate  2023-04-20
-     * @version     v1.0
-     * 
-     * @param i_Values           占位符CQL的填充集合。
-     * @return                   返回语句影响的记录数及自增长ID。
-     */
-    public XCQLData executeInsertPrepared(final Map<String ,?> i_Values)
-    {
-        return XCQLOPInsert.executeInsertPrepared(this ,i_Values);
-    }
-    
-    
-    
-    /**
-     * 一行数据的批量执行：占位符CQL的Insert语句的执行。
-     * 
-     * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
-     * 
-     * @author      ZhengWei(HY)
-     * @createDate  2023-04-20
-     * @version     v1.0
-     * 
-     * @param i_Obj              占位符CQL的填充对象。
-     * @return                   返回语句影响的记录数及自增长ID。
-     */
-    public XCQLData executeInsertPrepared(final Object i_Obj)
-    {
-        return XCQLOPInsert.executeInsertPrepared(this ,i_Obj);
-    }
-    
-    
-    
-    /**
-     * 一行数据的批量执行：占位符CQL的Insert语句的执行。（内部不再关闭数据库连接）
-     * 
-     * 1. 按集合 Map<String ,Object> 填充占位符CQL，生成可执行的CQL语句；
-     * 
-     * @author      ZhengWei(HY)
-     * @createDate  2023-04-20
-     * @version     v1.0
-     * 
-     * @param i_Values           占位符CQL的填充集合。
-     * @param i_Conn             数据库连接
-     * @return                   返回语句影响的记录数及自增长ID。
-     */
-    public XCQLData executeInsertPrepared(final Map<String ,?> i_Values ,final Connection i_Conn)
-    {
-        return XCQLOPInsert.executeInsertPrepared(this ,i_Values ,i_Conn);
-    }
-    
-    
-    
-    /**
-     * 一行数据的批量执行：占位符CQL的Insert语句的执行。（内部不再关闭数据库连接）
-     * 
-     * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
-     * 
-     * @author      ZhengWei(HY)
-     * @createDate  2023-04-20
-     * @version     v1.0
-     * 
-     * @param i_Obj              占位符CQL的填充对象。
-     * @param i_Conn             数据库连接
-     * @return                   返回语句影响的记录数及自增长ID。
-     */
-    public XCQLData executeInsertPrepared(final Object i_Obj ,final Connection i_Conn)
-    {
-        return XCQLOPInsert.executeInsertPrepared(this ,i_Obj ,i_Conn);
-    }
-    
-    
-    
-    /**
      * 批量执行：占位符CQL的Insert语句与Update语句的执行。
      * 
      * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
@@ -1275,65 +1202,6 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
     public XCQLData executeInserts(final List<?> i_ObjList ,final Connection i_Conn)
     {
         return XCQLOPInsert.executeInserts(this ,i_ObjList ,i_Conn);
-    }
-    
-    
-    
-    /**
-     * 批量执行：占位符CQL的Insert语句的执行。
-     * 
-     *   注意：不支持Delete语句
-     * 
-     * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
-     * 
-     * 注：只支持单一CQL语句的执行
-     * 
-     * @author      ZhengWei(HY)
-     * @createDate  2016-08-03
-     * @version     v1.0
-     *              v2.0  2022-05-24  1. 添加：支持自增长ID的获取及返回
-     * 
-     * @param i_ObjList          占位符CQL的填充对象的集合。
-     *                           1. 集合元素可以是Object
-     *                           2. 集合元素可以是Map<String ,?>
-     *                           3. 更可以是上面两者的混合元素组成的集合
-     * @return                   返回语句影响的记录数。
-     */
-    public XCQLData executeInsertsPrepared(final List<?> i_ObjList)
-    {
-        return XCQLOPInsert.executeInsertsPrepared(this ,i_ObjList);
-    }
-    
-    
-    
-    /**
-     * 批量执行：占位符CQL的Insert语句的执行。
-     * 
-     *   注意：不支持Delete语句
-     * 
-     * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
-     * 
-     * 注：只支持单一CQL语句的执行
-     * 
-     * @author      ZhengWei(HY)
-     * @createDate  2016-08-03
-     * @version     v1.0
-     *              v2.0  2022-05-24  1. 添加：支持自增长ID的获取及返回
-     * 
-     * @param i_ObjList          占位符CQL的填充对象的集合。
-     *                           1. 集合元素可以是Object
-     *                           2. 集合元素可以是Map<String ,?>
-     *                           3. 更可以是上面两者的混合元素组成的集合
-     * @param i_Conn             数据库连接。
-     *                           1. 当为空时，内部自动获取一个新的数据库连接。
-     *                           2. 当有值时，内部将不关闭数据库连接，而是交给外部调用者来关闭。
-     *                           3. 当有值时，内部也不执行"提交"操作（但分批提交this.batchCommit大于0时除外），而是交给外部调用者来执行"提交"。
-     *                           4. 当有值时，出现异常时，内部也不执行"回滚"操作，而是交给外部调用者来执行"回滚"。
-     * @return                   返回语句影响的记录数。
-     */
-    public XCQLData executeInsertsPrepared(final List<?> i_ObjList ,final Connection i_Conn)
-    {
-        return XCQLOPInsert.executeInsertsPrepared(this ,i_ObjList ,i_Conn);
     }
     
     
@@ -1879,9 +1747,10 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
      * 关闭外部所有与数据有关的连接
      * 
      * @param i_Resultset
+     * @param i_Transaction
      * @param i_Conn
      */
-    public void closeDB(Result i_Resultset ,Session i_Conn)
+    public void closeDB(Result i_Resultset ,Connection i_Conn)
     {
         try
         {
@@ -1952,7 +1821,7 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
     
     public void setContent(String i_CQLText)
     {
-        this.content.setcqlText(i_CQLText);
+        this.content.setCqlText(i_CQLText);
         this.isAllowExecutesSplit(i_CQLText);
     }
     
@@ -1991,7 +1860,7 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
         
         if ( this.content != null )
         {
-            this.isAllowExecutesSplit(this.content.getCQLText());
+            this.isAllowExecutesSplit(this.content.getCqlText());
         }
     }
     
@@ -2235,7 +2104,7 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
      * 
      * @return
      */
-    public Session getConnection(DataSourceCQL i_DataSourceCQL)
+    public Connection getConnection(DataSourceCQL i_DataSourceCQL)
     {
         return i_DataSourceCQL.getConnection();
     }

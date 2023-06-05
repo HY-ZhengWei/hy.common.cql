@@ -1,5 +1,6 @@
 package org.hy.common.xcql;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,12 +13,10 @@ import org.hy.common.CycleNextList;
 import org.hy.common.Date;
 import org.hy.common.Help;
 import org.hy.common.PartitionMap;
+import org.hy.common.StaticReflect;
 import org.hy.common.StringHelp;
 import org.hy.common.TablePartitionBusway;
 import org.hy.common.XJavaID;
-import org.hy.common.xml.XCQLOPDDL;
-import org.hy.common.xml.XCQLOPUpdate;
-import org.hy.common.xml.XJava;
 import org.hy.common.xml.log.Logger;
 import org.hy.common.xml.plugins.XRule;
 import org.neo4j.driver.Result;
@@ -82,6 +81,9 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
                                                                
     /** 缓存大小 */
     protected static final int                                 $BufferSize     = 4 * 1024;
+    
+    /** 对象池，在无XJava的环境中使用的兼容模式 */
+    private static final Map<String ,Object>                     $CQLPool        = new HashMap<String ,Object>();
     
     
     
@@ -193,9 +195,65 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
         this.allowExecutesSplit = false;
         this.uuid               = StringHelp.getUUID();
         this.comment            = null;
-        this.error              = (XCQLError)XJava.getObject($XCQLErrors);
         this.beforeRule         = null;
         this.afterRule          = null;
+        this.error              = (XCQLError) xjavaGetObject($XCQLErrors);
+    }
+    
+    
+    
+    /**
+     * 获取对象池中的对象，在无XJava的环境中使用的兼容模式
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-05
+     * @version     v1.0
+     *
+     * @param i_XID  对象XID
+     * @return
+     */
+    private static Object xjavaGetObject(String i_XID)
+    {
+        try
+        {
+            // 用反射的方式执行 XJava.getObject()
+            Method v_XJavaGetObjectMethod = Help.forName("org.hy.common.xml.XJava").getMethod("getObject" ,String.class);
+            Object v_Object               = StaticReflect.invoke(v_XJavaGetObjectMethod ,i_XID);
+            return v_Object;
+        }
+        catch (Exception exce)
+        {
+            $Logger.warn("未加载XJava组件" ,exce);
+            return $CQLPool.get(i_XID);
+        }
+    }
+    
+    
+    
+    /**
+     * 设置对象池中的对象，在无XJava的环境中使用的兼容模式
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-05
+     * @version     v1.0
+     *
+     * @param i_XID      对象XID
+     * @param i_XObject  对象
+     * @return
+     */
+    private static void xjavaPutObject(String i_XID ,Object i_XObject)
+    {
+        try
+        {
+            // 用反射的方式执行 XJava.putObject()
+            Method v_XJavaPutObjectMethod = Help.forName("org.hy.common.xml.XJava").getMethod("putObject" ,String.class ,Object.class);
+            StaticReflect.invoke(v_XJavaPutObjectMethod ,i_XID ,i_XObject);
+        }
+        catch (Exception exce)
+        {
+            $Logger.warn("未加载XJava组件" ,exce);
+            $CQLPool.put(i_XID ,i_XObject);
+        }
     }
     
     
@@ -357,7 +415,7 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
                 v_XCQL.setDomain(     this.getDomain());
                 v_XCQL.setBatchCommit(this.getBatchCommit());
                 
-                XJava.putObject(v_XCQL.getXJavaID() ,v_XCQL);
+                xjavaPutObject(v_XCQL.getXJavaID() ,v_XCQL);
             }
             
             if ( v_XCQL.getContentDB().getCqlText().indexOf(";/") >= 0 )
@@ -367,6 +425,154 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
         }
         
         this.trigger.setInit(false);
+    }
+    
+    
+    
+    /**
+     * 通用(限定常用的数据库)分页查询。-- i_XCQL中的普通CQL，将通过模板变成一个分页CQL
+     * 
+     * 本方法并不真的执行查询，而是获取一个分页查询的XCQL对象。
+     * 
+     * 与游标分页查询相比，其性能是很高的。
+     * 
+     * CQL语句中的占位符 :StartIndex 下标从0开始
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2016-02-22
+     * @version     v1.0
+     *
+     * @param i_XCQLID
+     * @return
+     */
+    public static XCQL queryPaging(String i_XCQLID)
+    {
+        return XCQL.queryPaging((XCQL)xjavaGetObject(i_XCQLID) ,false);
+    }
+    
+    
+    
+    /**
+     * 通用(限定常用的数据库)分页查询。-- i_XCQL中的普通CQL，将通过模板变成一个分页CQL
+     * 
+     * 本方法并不真的执行查询，而是获取一个分页查询的XCQL对象。
+     * 
+     * 与游标分页查询相比，其性能是很高的。
+     * 
+     * CQL语句中的占位符 :StartIndex 下标从0开始
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2016-02-22
+     * @version     v1.0
+     *
+     * @param i_XCQL
+     * @return
+     */
+    public static XCQL queryPaging(XCQL i_XCQL)
+    {
+        return XCQL.queryPaging(i_XCQL ,false);
+    }
+    
+    
+    
+    /**
+     * 通用(限定常用的数据库)分页查询。
+     * 
+     * 本方法并不真的执行查询，而是获取一个分页查询的XCQL对象。
+     * 
+     * 与游标分页查询相比，其性能是很高的。
+     * 
+     * CQL语句中的占位符 :StartIndex 下标从0开始
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2016-02-22
+     * @version     v1.0
+     *
+     * @param i_XCQL
+     * @param i_IsClone  标示参数对象i_XCQL，是否会被改变。
+     *                   1. 当为true时，用通用模板、具体i_XCQL生成一个全新的XCQL。
+     *                   2. 当为false时，i_XCQL中的普通CQL，将通过模板变成一个分页CQL
+     * @return
+     */
+    public static XCQL queryPaging(String i_XCQLID ,boolean i_IsClone)
+    {
+        return XCQL.queryPaging((XCQL)xjavaGetObject(i_XCQLID) ,i_IsClone);
+    }
+    
+    
+    
+    /**
+     * 通用(限定常用的数据库)分页查询。
+     * 
+     * 本方法并不真的执行查询，而是获取一个分页查询的XCQL对象。
+     * 
+     * 与游标分页查询相比，其性能是很高的。
+     * 
+     * CQL语句中的占位符 :StartIndex 下标从0开始
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2016-02-22
+     * @version     v1.0
+     *
+     * @param i_XCQL
+     * @param i_IsClone  标示参数对象i_XCQL，是否会被改变。
+     *                   1. 当为true时，用通用模板、具体i_XCQL生成一个全新的XCQL。
+     *                   2. 当为false时，i_XCQL中的普通CQL，将通过模板变成一个分页CQL
+     * @return
+     */
+    public synchronized static XCQL queryPaging(XCQL i_XCQL ,boolean i_IsClone)
+    {
+        if ( null == i_XCQL )
+        {
+            return null;
+        }
+        
+        String v_DBType = i_XCQL.getDataSourceCQL().getDbProductType();
+        String v_PMKey  = v_DBType + "_" + i_XCQL.getObjectID();
+        
+        if ( $PagingMap.containsKey(v_PMKey) )
+        {
+            return $PagingMap.get(v_PMKey);
+        }
+        
+        String v_PagingTemplate = null;
+        if ( !Help.isNull(v_DBType) )
+        {
+            v_PagingTemplate = ":CQLPaging SKIP :StartIndex LIMIT :PagePerCount";
+        }
+        else
+        {
+            return null;
+        }
+        
+        String v_PaginCQLText = StringHelp.replaceAll(v_PagingTemplate ,":CQLPaging" ,i_XCQL.getContent().getCqlText());
+        
+        if ( i_IsClone )
+        {
+            // 用通用模板、具体i_XCQL生成一个全新的XCQL。
+            // 优势：具体i_XCQL可零活使用，因为它本身没有变化，还可以用于非分页的查询。
+            // 缺点：新XCQL与具体i_XCQL统计量不统一。
+            XCQL v_NewXCQL = new XCQL();
+            
+            v_NewXCQL.setDataSourceCQL(i_XCQL.getDataSourceCQL());
+            v_NewXCQL.setResult(       i_XCQL.getResult());
+            v_NewXCQL.getContent().setCqlText(v_PaginCQLText);
+            
+            // 注意：这里是Key是i_XCQL，而不是v_NewXCQL的uuid
+            $PagingMap.put(v_PMKey ,v_NewXCQL);
+            xjavaPutObject("XPaging_" + v_PMKey ,v_NewXCQL);
+            return v_NewXCQL;
+        }
+        else
+        {
+            // 用通用模板替换具体i_XCQL中的内容。
+            // 优势：统计功能统一。
+            // 缺点：具体i_XCQL就变为专用于分页查询的CQL。
+            i_XCQL.getContent().setCqlText(v_PaginCQLText);
+            
+            $PagingMap.put(v_PMKey ,i_XCQL);
+            return i_XCQL;
+        }
     }
     
     
@@ -1341,92 +1547,6 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
     
     
     /**
-     * 一行数据的批量执行：占位符CQL的Insert语句与Update语句的执行。
-     * 
-     * 1. 按集合 Map<String ,Object> 填充占位符CQL，生成可执行的CQL语句；
-     * 
-     * @author      ZhengWei(HY)
-     * @createDate  2023-04-20
-     * @version     v1.0
-     * 
-     * @param i_Values           占位符CQL的填充集合。
-     * @return  返回语句影响的记录数。
-     *            当 getID=false 时，返回值表示：影响的记录行数
-     *            当 getID=true  时，返回值表示：写入首条记录的自增长ID的值。影响0行时，返回0
-     */
-    public int executeUpdatePrepared(Map<String ,?> i_Values)
-    {
-        return XCQLOPUpdate.executeUpdatePrepared(this ,i_Values);
-    }
-    
-    
-    
-    /**
-     * 一行数据的批量执行：占位符CQL的Insert语句与Update语句的执行。
-     * 
-     * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
-     * 
-     * @author      ZhengWei(HY)
-     * @createDate  2023-04-20
-     * @version     v1.0
-     * 
-     * @param i_Obj              占位符CQL的填充对象。
-     * @return  返回语句影响的记录数。
-     *            当 getID=false 时，返回值表示：影响的记录行数
-     *            当 getID=true  时，返回值表示：写入首条记录的自增长ID的值。影响0行时，返回0
-     */
-    public int executeUpdatePrepared(Object i_Obj)
-    {
-        return XCQLOPUpdate.executeUpdatePrepared(this ,i_Obj);
-    }
-    
-    
-    
-    /**
-     * 一行数据的批量执行：占位符CQL的Insert语句与Update语句的执行。（内部不再关闭数据库连接）
-     * 
-     * 1. 按集合 Map<String ,Object> 填充占位符CQL，生成可执行的CQL语句；
-     * 
-     * @author      ZhengWei(HY)
-     * @createDate  2023-04-20
-     * @version     v1.0
-     * 
-     * @param i_Values           占位符CQL的填充集合。
-     * @param i_Conn             数据库连接
-     * @return  返回语句影响的记录数。
-     *            当 getID=false 时，返回值表示：影响的记录行数
-     *            当 getID=true  时，返回值表示：写入首条记录的自增长ID的值。影响0行时，返回0
-     */
-    public int executeUpdatePrepared(Map<String ,?> i_Values ,Connection i_Conn)
-    {
-        return XCQLOPUpdate.executeUpdatePrepared(this ,i_Values ,i_Conn);
-    }
-    
-    
-    
-    /**
-     * 一行数据的批量执行：占位符CQL的Insert语句与Update语句的执行。（内部不再关闭数据库连接）
-     * 
-     * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
-     * 
-     * @author      ZhengWei(HY)
-     * @createDate  2023-04-20
-     * @version     v1.0
-     * 
-     * @param i_Obj              占位符CQL的填充对象。
-     * @param i_Conn             数据库连接
-     * @return  返回语句影响的记录数。
-     *            当 getID=false 时，返回值表示：影响的记录行数
-     *            当 getID=true  时，返回值表示：写入首条记录的自增长ID的值。影响0行时，返回0
-     */
-    public int executeUpdatePrepared(Object i_Obj ,Connection i_Conn)
-    {
-        return XCQLOPUpdate.executeUpdatePrepared(this ,i_Obj ,i_Conn);
-    }
-    
-    
-    
-    /**
      * 批量执行：占位符CQL的Insert语句与Update语句的执行。
      * 
      * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
@@ -1473,67 +1593,6 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
     public int executeUpdates(List<?> i_ObjList ,Connection i_Conn)
     {
         return XCQLOPUpdate.executeUpdates(this ,i_ObjList ,i_Conn);
-    }
-    
-    
-    
-    /**
-     * 批量执行：占位符CQL的Insert语句与Update语句的执行。
-     * 
-     *   注意：不支持Delete语句
-     * 
-     * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
-     * 
-     * 注：只支持单一CQL语句的执行
-     * 
-     * @author      ZhengWei(HY)
-     * @createDate  2016-08-03
-     * @version     v1.0
-     * 
-     * @param i_ObjList          占位符CQL的填充对象的集合。
-     *                           1. 集合元素可以是Object
-     *                           2. 集合元素可以是Map<String ,?>
-     *                           3. 更可以是上面两者的混合元素组成的集合
-     * @return  返回语句影响的记录数。
-     *            当 getID=false 时，返回值表示：影响的记录行数
-     *            当 getID=true  时，返回值表示：写入首条记录的自增长ID的值。影响0行时，返回0
-     */
-    public int executeUpdatesPrepared(List<?> i_ObjList)
-    {
-        return XCQLOPUpdate.executeUpdatesPrepared(this ,i_ObjList);
-    }
-    
-    
-    
-    /**
-     * 批量执行：占位符CQL的Insert语句与Update语句的执行。
-     * 
-     *   注意：不支持Delete语句
-     * 
-     * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
-     * 
-     * 注：只支持单一CQL语句的执行
-     * 
-     * @author      ZhengWei(HY)
-     * @createDate  2016-08-03
-     * @version     v1.0
-     * 
-     * @param i_ObjList          占位符CQL的填充对象的集合。
-     *                           1. 集合元素可以是Object
-     *                           2. 集合元素可以是Map<String ,?>
-     *                           3. 更可以是上面两者的混合元素组成的集合
-     * @param i_Conn             数据库连接。
-     *                           1. 当为空时，内部自动获取一个新的数据库连接。
-     *                           2. 当有值时，内部将不关闭数据库连接，而是交给外部调用者来关闭。
-     *                           3. 当有值时，内部也不执行"提交"操作（但分批提交this.batchCommit大于0时除外），而是交给外部调用者来执行"提交"。
-     *                           4. 当有值时，出现异常时，内部也不执行"回滚"操作，而是交给外部调用者来执行"回滚"。
-     * @return  返回语句影响的记录数。
-     *            当 getID=false 时，返回值表示：影响的记录行数
-     *            当 getID=true  时，返回值表示：写入首条记录的自增长ID的值。影响0行时，返回0
-     */
-    public int executeUpdatesPrepared(List<?> i_ObjList ,Connection i_Conn)
-    {
-        return XCQLOPUpdate.executeUpdatesPrepared(this ,i_ObjList ,i_Conn);
     }
     
     
@@ -1953,7 +2012,7 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
             {
                 try
                 {
-                    v_Conn.commit();
+                    v_Conn.beginTransaction().commit();
                 }
                 catch (Exception exce)
                 {
@@ -1972,11 +2031,11 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
                 {
                     if ( v_IsOK )
                     {
-                        v_Conn.commit();
+                        v_Conn.beginTransaction().commit();
                     }
                     else
                     {
-                        v_Conn.rollback();
+                        v_Conn.beginTransaction().rollback();
                     }
                 }
                 catch (Exception exce)
@@ -2013,43 +2072,7 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
             {
                 try
                 {
-                    v_Conn.rollback();
-                }
-                catch (Exception exce)
-                {
-                    // 异常用不抛出
-                    v_IsOK = false;
-                }
-            }
-        }
-        
-        return v_IsOK;
-    }
-    
-    
-    
-    /**
-     * 多个数据库连接批量设置是否自动提交
-     * 
-     * @author      ZhengWei(HY)
-     * @createDate  2018-01-21
-     * @version     v1.0
-     *
-     * @param i_Conns       数据库连接的集合
-     * @param i_AutoCommit  是否自动提交
-     * @return
-     */
-    public static boolean setAutoCommits(List<Connection> i_Conns ,boolean i_AutoCommit)
-    {
-        boolean v_IsOK = true;
-        
-        if ( !Help.isNull(i_Conns) )
-        {
-            for (Connection v_Conn : i_Conns)
-            {
-                try
-                {
-                    v_Conn.setAutoCommit(i_AutoCommit);
+                    v_Conn.beginTransaction().rollback();
                 }
                 catch (Exception exce)
                 {
@@ -2266,11 +2289,9 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
         }
         
         if ( !$Type_NormalCQL.equals(i_Type)
-          && !$Type_Procedure.equals(i_Type)
-          && !$Type_Function .equals(i_Type)
           && !$Type_Create   .equals(i_Type) )
         {
-            throw new IllegalArgumentException("Type is not 'N' or 'P' or 'F' or 'C' of XCQL.");
+            throw new IllegalArgumentException("Type is not 'N' or 'C' of XCQL.");
         }
         
         this.type = i_Type;

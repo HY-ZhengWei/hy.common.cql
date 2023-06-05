@@ -19,8 +19,8 @@ public enum DBNameStyle
     /**
      * 字段名称按数据库默认样式显示
      * 
-     * 即，SQL语句中是什么样式的就显示什么样式。
-     * 如，SELECT id ,Name ,ABC FROM DEMO; 此SQL语句中生成的字段名称样式为：id ,Name ,ABC
+     * 即，CQL语句中是什么样式的就显示什么样式。
+     * 如，SELECT id ,Name ,ABC FROM DEMO; 此CQL语句中生成的字段名称样式为：id ,Name ,ABC
      */
    ,$Normal("NORMAL")
    

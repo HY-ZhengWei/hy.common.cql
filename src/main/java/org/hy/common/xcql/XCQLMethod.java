@@ -36,7 +36,7 @@ public final class XCQLMethod
     private List<XCQLMethodParam>                paramList;
     
     /**
-     * 当 XSQLResult.cfill 等于 "setter(colValue)" 时（即，XSQLResult.$CFILL_METHOD_VARY），此值才会有效。
+     * 当 XCQLResult.cfill 等于 "setter(colValue)" 时（即，XCQLResult.$CFILL_METHOD_VARY），此值才会有效。
      * 
      * 其意为按 call 方法的入参类型，决定 org.neo4j.driver.Result 获取字段值的方法。
      * 而不是用 if 语句在填充数据时才判断，而是预先解释好，填充数据时直接调用相关实例化的类，来提高性能。

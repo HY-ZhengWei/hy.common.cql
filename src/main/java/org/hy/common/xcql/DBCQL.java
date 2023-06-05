@@ -1833,10 +1833,6 @@ class DBCQLFillDefault implements DBCQLFill ,Serializable
  * @author      ZhengWei(HY)
  * @createDate  2016-08-09
  * @version     v1.0
- *              v2.0  2019-05-08  添加：对MySQL数据库添加\号的转义。\号本身就是MySQL数据库的转义符。
- *                                      但写入文本信息时，\号多数时是想被直接当普通符号写入到数据库中。
- *              v3.0  2019-08-23  添加：是否允许替换字符串。防止如：'A' ,'B' ,'C' ... ,'Z'  这样格式的字符串被替换
- *                                      一般用于由外界动态生成的在 IN 语法中，如 IN ('A' ,'B' ,'C' ... ,'Z')，此时这里的单引号就不应被替换。
  */
 class DBCQLFillKeyReplace implements DBCQLFill ,Serializable
 {

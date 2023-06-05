@@ -10,6 +10,7 @@ import org.hy.common.xml.log.Logger;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
+import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.SessionConfig;
 
@@ -30,6 +31,8 @@ public class DataSourceCQL implements Comparable<DataSourceCQL> ,XJavaID ,Serial
 
     private static final Logger $Logger          = new Logger(DataSourceCQL.class ,true);
     
+    public static  final String $DBType_Neo4j    = "NEO4J";
+    
     
     
     /** 唯一标示，主用于对比等操作 */
@@ -37,6 +40,15 @@ public class DataSourceCQL implements Comparable<DataSourceCQL> ,XJavaID ,Serial
     
     /** XJava池中对象的ID标识 */
     private String             xjavaID;
+    
+    /** 数据库产品名称 */
+    private String             dbProductName;
+    
+    /** 数据库产品版本 */
+    private String             dbProductVersion;
+    
+    /** 数据库产品类型 */
+    private String             dbProductType;
     
     /** 注释。可用于日志的输出等帮助性的信息 */
     private String             comment;
@@ -354,6 +366,96 @@ public class DataSourceCQL implements Comparable<DataSourceCQL> ,XJavaID ,Serial
     private String getObjectID()
     {
         return this.uuid;
+    }
+    
+    
+    
+    /**
+     * 获取：数据库产品名称
+     */
+    public String getDbProductName()
+    {
+        this.getDBProductInfo();
+        return dbProductName;
+    }
+
+
+    
+    /**
+     * 获取：数据库产品版本
+     */
+    public String getDbProductVersion()
+    {
+        this.getDBProductInfo();
+        return dbProductVersion;
+    }
+
+
+    
+    /**
+     * 获取：数据库产品类型
+     */
+    public String getDbProductType()
+    {
+        this.getDBProductInfo();
+        return dbProductType;
+    }
+    
+    
+    
+    /**
+     * 获取图数据库产品信息
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-05
+     * @version     v1.0
+     *
+     */
+    private synchronized void getDBProductInfo()
+    {
+        if ( null != this.dbProductType )
+        {
+            return;
+        }
+        
+        Connection v_Conn = null;
+        try
+        {
+            v_Conn = this.getConnection();
+            if ( v_Conn == null )
+            {
+                return;
+            }
+            
+            Result v_Result = v_Conn.run("MATCH (n) RETURN n LIMIT 1");
+            
+            this.dbProductName    = $DBType_Neo4j;
+            this.dbProductVersion = v_Result.consume().server().protocolVersion();
+            this.dbProductType    = $DBType_Neo4j;
+        }
+        catch (Exception exce)
+        {
+            $Logger.error(exce);
+        }
+        finally
+        {
+            try
+            {
+                if ( v_Conn != null )
+                {
+                    v_Conn.close();
+                    v_Conn = null;
+                }
+            }
+            catch (Exception exce)
+            {
+                throw new RuntimeException(exce.getMessage());
+            }
+            finally
+            {
+                v_Conn = null;
+            }
+        }
     }
     
     

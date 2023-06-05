@@ -13,7 +13,7 @@ import org.neo4j.driver.Transaction;
 
 
 /**
- * XCQL功能中Insert语句的具体操作与实现。
+ * XCQL功能中Create语句（创建节点、创建关系）的具体操作与实现。
  * 
  * 核心区别：它与executeUpdate方法的核心区别是：本类的所有方法将尝试返回【数据库级的自增ID】，方法返回类型为：XCQLData
  * 独立原因：从XCQL主类中分离的主要原因是：减少XCQL主类的代码量，方便维护。使XCQL主类向外提供统一的操作，本类重点关注实现。
@@ -35,7 +35,7 @@ public class XCQLOPInsert
      * @version     v3.0
      * 
      * @param i_XCQL
-     * @return        返回语句影响的记录数及自增长ID。
+     * @return
      */
     public static XCQLData executeInsert(final XCQL i_XCQL)
     {
@@ -93,7 +93,7 @@ public class XCQLOPInsert
      * @version     v3.0
      * 
      * @param i_Values           占位符CQL的填充集合。
-     * @return                   返回语句影响的记录数及自增长ID。
+     * @return
      */
     public static XCQLData executeInsert(final XCQL i_XCQL ,final Map<String ,?> i_Values)
     {
@@ -153,7 +153,7 @@ public class XCQLOPInsert
      * @version     v3.0
      * 
      * @param i_Obj              占位符CQL的填充对象。
-     * @return                   返回语句影响的记录数及自增长ID。
+     * @return
      */
     public static XCQLData executeInsert(final XCQL i_XCQL ,final Object i_Obj)
     {
@@ -209,7 +209,7 @@ public class XCQLOPInsert
      * @version     v3.0
      * 
      * @param i_CQL              常规CQL语句
-     * @return                   返回语句影响的记录数及自增长ID。
+     * @return
      */
     public static XCQLData executeInsert(final XCQL i_XCQL ,final String i_CQL)
     {
@@ -257,7 +257,7 @@ public class XCQLOPInsert
      * @version     v3.0
      * 
      * @param i_CQL              常规CQL语句
-     * @return                   返回语句影响的记录数及自增长ID。
+     * @return
      */
     private static XCQLData executeInsert_Inner(final XCQL i_XCQL ,final String i_CQL ,final DataSourceCQL i_DSG)
     {
@@ -311,7 +311,7 @@ public class XCQLOPInsert
      * @version     v3.0
      * 
      * @param i_Conn             数据库连接
-     * @return                   返回语句影响的记录数及自增长ID。
+     * @return
      */
     public static XCQLData executeInsert(final XCQL i_XCQL ,final Connection i_Conn)
     {
@@ -368,7 +368,7 @@ public class XCQLOPInsert
      * 
      * @param i_Values           占位符CQL的填充集合。
      * @param i_Conn             数据库连接
-     * @return                   返回语句影响的记录数及自增长ID。
+     * @return
      */
     public static XCQLData executeInsert(final XCQL i_XCQL ,final Map<String ,?> i_Values ,final Connection i_Conn)
     {
@@ -426,7 +426,7 @@ public class XCQLOPInsert
      * 
      * @param i_Obj              占位符CQL的填充对象。
      * @param i_Conn             数据库连接
-     * @return                   返回语句影响的记录数及自增长ID。
+     * @return
      */
     public static XCQLData executeInsert(final XCQL i_XCQL ,final Object i_Obj ,final Connection i_Conn)
     {
@@ -482,7 +482,7 @@ public class XCQLOPInsert
      * 
      * @param i_CQL              常规CQL语句
      * @param i_Conn             数据库连接
-     * @return                   返回语句影响的记录数及自增长ID。
+     * @return
      */
     public static XCQLData executeInsert(final XCQL i_XCQL ,final String i_CQL ,final Connection i_Conn)
     {
@@ -531,7 +531,7 @@ public class XCQLOPInsert
      * 
      * @param i_CQL              常规CQL语句
      * @param i_Conn             数据库连接
-     * @return                   返回语句影响的记录数及自增长ID。
+     * @return
      */
     private static XCQLData executeInsert_Inner(final XCQL i_XCQL ,final String i_CQL ,final Connection i_Conn)
     {

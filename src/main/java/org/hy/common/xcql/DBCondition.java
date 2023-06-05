@@ -20,9 +20,9 @@ import com.greenpineyu.fel.context.MapContext;
 
 
 /**
- * 占位符取值条件。当条件满足时，占位符对应的值对被填充应用到SQL语句中。
+ * 占位符取值条件。当条件满足时，占位符对应的值对被填充应用到CQL语句中。
  * 
- * 用于动态标识 <[ ... ]>之内的占位符，可以控制动态标识内的SQL段是否拼接到最终执行SQL上执行。
+ * 用于动态标识 <[ ... ]>之内的占位符，可以控制动态标识内的CQL段是否拼接到最终执行CQL上执行。
  * 
  * 占位符X按某个设定的条件取值，当条件满足(True)时取值A，否则取值B。
  * 取值A、B可以如下四种取值类型：
@@ -36,10 +36,7 @@ import com.greenpineyu.fel.context.MapContext;
  *      2.  支持函数型占位符。即占位符是一个方法的引用。占位符对应的数值，通过引用方法的返回值获取。
  * 
  * @author      ZhengWei(HY)
- * @createDate  2018-08-03  从XSQLNode中剥离出来，独立后共用。
- * @version     v1.0
- *              v1.1  2019-02-12  修复：setTrue()方法错误的将 $DefautlTrueValue 判定了两边。
- *                                      发现人：李浩
+ * @createDate  2023-06-03
  */
 public class DBCondition implements Serializable
 {
@@ -50,7 +47,7 @@ public class DBCondition implements Serializable
     /** 条件满足时，真值的默认值。表示取占位符对应的值 */
     public static  final String $DefautlTrueValue  = "THIS";
     
-    /** 条件不满足时，假值的默认值。表示空指针，当位于动态标识 <[ ... ]>之内时，此动态标识内的SQL段将不参与整个SQL的执行 */
+    /** 条件不满足时，假值的默认值。表示空指针，当位于动态标识 <[ ... ]>之内时，此动态标识内的CQL段将不参与整个CQL的执行 */
     public static  final String $DefaultFalseValue = "NULL";
     
     /**

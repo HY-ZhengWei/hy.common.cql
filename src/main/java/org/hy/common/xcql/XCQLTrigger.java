@@ -235,35 +235,6 @@ public class XCQLTrigger
     
     
     /**
-     * 触发执行所有的操作（针对批量执行）
-     * 
-     * @author      ZhengWei(HY)
-     * @createDate  2017-01-05
-     * @version     v1.0
-     *
-     * @param i_Obj  主XCQL的入参数
-     */
-    public void executeUpdatesPrepared(List<?> i_ObjList)
-    {
-        if ( this.syncMode )
-        {
-            for (XCQLTriggerInfo v_XCQLTrigger : this.xcqls)
-            {
-                v_XCQLTrigger.getXcql().executeUpdatesPrepared(i_ObjList);
-            }
-        }
-        else
-        {
-            for (XCQLTriggerInfo v_XCQLTrigger : this.xcqls)
-            {
-                (new Execute(v_XCQLTrigger.getXcql() ,"executeUpdatesPrepared" ,i_ObjList)).start();
-            }
-        }
-    }
-    
-    
-    
-    /**
      * 创建一个备份(数据冗余)的触发器
      * 
      * 这里只需备份数据库的连接池组，其它属性信息均与主数据库一样（属性赋值在其后的操作中设置 XCQL.initTriggers() ）。

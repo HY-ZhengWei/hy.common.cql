@@ -13,9 +13,9 @@ import org.neo4j.driver.Transaction;
 
 
 /**
- * XCQL功能中Create语句（创建节点、创建关系）的具体操作与实现。
+ * XCQL功能中Create\Set\Delete语句的具体操作与实现。
  * 
- * 核心区别：它与executeUpdate方法的核心区别是：本类的所有方法将尝试返回【数据库级的自增ID】，方法返回类型为：XCQLData
+ * 核心区别：它与executeUpdate方法的核心区别是：方法返回类型为：XCQLData
  * 独立原因：从XCQL主类中分离的主要原因是：减少XCQL主类的代码量，方便维护。使XCQL主类向外提供统一的操作，本类重点关注实现。
  * 静态原因：用static方法的原因：不想再构建太多的类实例，减少内存负担
  * 接口选择：未使用接口的原因：本类的每个方法的首个入参都有一个XCQL类型，并且都是static方法
@@ -28,7 +28,7 @@ public class XCQLOPInsert
 {
     
     /**
-     * 占位符CQL的Insert语句的执行。 -- 无填充值的
+     * 占位符CQL的Create\Set\Delete语句的执行。 -- 无填充值的
      * 
      * @author      ZhengWei(HY)
      * @createDate  2022-05-23
@@ -82,11 +82,9 @@ public class XCQLOPInsert
     
     
     /**
-     * 占位符CQL的Insert语句的执行。
+     * 占位符CQL的Create\Set\Delete语句的执行。
      * 
      * 1. 按集合 Map<String ,Object> 填充占位符CQL，生成可执行的CQL语句；
-     * 
-     * V2.0  2018-07-18  1.添加：支持CLob字段类型的简单Insert的写入操作。
      * 
      * @author      ZhengWei(HY)
      * @createDate  2022-05-23
@@ -142,11 +140,9 @@ public class XCQLOPInsert
     
     
     /**
-     * 占位符CQL的Insert语句的执行。
+     * 占位符CQL的Create\Set\Delete语句的执行。
      * 
      * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
-     * 
-     * V2.0  2018-07-18  1.添加：支持CLob字段类型的简单Insert的写入操作。
      * 
      * @author      ZhengWei(HY)
      * @createDate  2022-05-23
@@ -202,7 +198,7 @@ public class XCQLOPInsert
     
     
     /**
-     * 常规Insert语句的执行。
+     * 常规Create\Set\Delete语句的执行。
      * 
      * @author      ZhengWei(HY)
      * @createDate  2022-05-23
@@ -250,7 +246,7 @@ public class XCQLOPInsert
     
     
     /**
-     * 常规Insert语句的执行。
+     * 常规Create\Set\Delete语句的执行。
      * 
      * @author      ZhengWei(HY)
      * @createDate  2022-05-23
@@ -281,14 +277,24 @@ public class XCQLOPInsert
             v_Result = v_Conn.run(i_CQL);
             i_XCQL.log(i_CQL);
             
-            int v_Count = v_Result.consume().counters().nodesCreated()
-                        + v_Result.consume().counters().relationshipsCreated();
+            int v_RowCount = v_Result.consume().counters().nodesCreated()
+                           + v_Result.consume().counters().nodesDeleted();
+            int v_ColCount = v_Result.consume().counters().propertiesSet();
+            int v_RelCount = v_Result.consume().counters().relationshipsCreated()
+                           + v_Result.consume().counters().relationshipsDeleted();
+            
+            int v_Count = v_RowCount + v_RelCount;
+            // 当并非创建、删除节点和关系时，才取对属性的操作数量
+            if ( v_Count <= 0 )
+            {
+                v_Count = v_ColCount;
+            }
             
             Date v_EndTime = Date.getNowTime();
             long v_TimeLen = v_EndTime.getTime() - v_BeginTime;
             i_XCQL.success(v_EndTime ,v_TimeLen ,1 ,v_Count);
             
-            return new XCQLData(null ,v_Count ,1 ,v_TimeLen ,null);
+            return new XCQLData(null ,v_RowCount ,v_ColCount ,v_RelCount ,v_TimeLen ,null);
         }
         catch (Exception exce)
         {
@@ -304,7 +310,7 @@ public class XCQLOPInsert
     
     
     /**
-     * 占位符CQL的Insert语句的执行。 -- 无填充值的（内部不再关闭数据库连接）
+     * 占位符CQL的Create\Set\Delete语句的执行。 -- 无填充值的（内部不再关闭数据库连接）
      * 
      * @author      ZhengWei(HY)
      * @createDate  2022-05-23
@@ -358,7 +364,7 @@ public class XCQLOPInsert
     
     
     /**
-     * 占位符CQL的Insert语句的执行。（内部不再关闭数据库连接）
+     * 占位符CQL的Create\Set\Delete语句的执行。（内部不再关闭数据库连接）
      * 
      * 1. 按集合 Map<String ,Object> 填充占位符CQL，生成可执行的CQL语句；
      * 
@@ -416,7 +422,7 @@ public class XCQLOPInsert
     
     
     /**
-     * 占位符CQL的Insert语句的执行。（内部不再关闭数据库连接）
+     * 占位符CQL的Create\Set\Delete语句的执行。（内部不再关闭数据库连接）
      * 
      * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
      * 
@@ -474,7 +480,7 @@ public class XCQLOPInsert
     
     
     /**
-     * 常规Insert语句的执行。（内部不再关闭数据库连接）
+     * 常规Create\Set\Delete语句的执行。（内部不再关闭数据库连接）
      * 
      * @author      ZhengWei(HY)
      * @createDate  2022-05-23
@@ -523,7 +529,7 @@ public class XCQLOPInsert
     
     
     /**
-     * 常规Insert语句的执行。（内部不再关闭数据库连接）
+     * 常规Create\Set\Delete语句的执行。（内部不再关闭数据库连接）
      * 
      * @author      ZhengWei(HY)
      * @createDate  2022-05-23
@@ -550,16 +556,26 @@ public class XCQLOPInsert
             }
             
             Result v_Result = i_Conn.run(i_CQL);
-            int    v_Count  = v_Result.consume().counters().nodesCreated()
-                            + v_Result.consume().counters().relationshipsCreated();
-            i_XCQL.log(i_CQL);
+            int v_RowCount = v_Result.consume().counters().nodesCreated()
+                           + v_Result.consume().counters().nodesDeleted();
+            int v_ColCount = v_Result.consume().counters().propertiesSet();
+            int v_RelCount = v_Result.consume().counters().relationshipsCreated()
+                           + v_Result.consume().counters().relationshipsDeleted();
             
+            int v_Count    = v_RowCount + v_RelCount;
+            // 当并非创建、删除节点和关系时，才取对属性的操作数量
+            if ( v_Count <= 0 )
+            {
+                v_Count = v_ColCount;
+            }
+            
+            i_XCQL.log(i_CQL);
             
             Date v_EndTime = Date.getNowTime();
             long v_TimeLen = v_EndTime.getTime() - v_BeginTime;
             i_XCQL.success(v_EndTime ,v_TimeLen ,1 ,v_Count);
             
-            return new XCQLData(null ,v_Count ,1 ,v_TimeLen ,null);
+            return new XCQLData(null ,v_RowCount ,v_ColCount ,v_RelCount ,v_TimeLen ,null);
         }
         catch (Exception exce)
         {
@@ -575,7 +591,7 @@ public class XCQLOPInsert
     
     
     /**
-     * 批量执行：占位符CQL的Insert语句的执行。
+     * 批量执行：占位符CQL的Create\Set\Delete语句的执行。
      * 
      * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
      * 
@@ -632,7 +648,7 @@ public class XCQLOPInsert
     
     
     /**
-     * 批量执行：占位符CQL的Insert语句的执行。
+     * 批量执行：占位符CQL的Create\Set\Delete语句的执行。
      * 
      *   注意：不支持Delete语句
      * 
@@ -696,9 +712,7 @@ public class XCQLOPInsert
     
     
     /**
-     * 批量执行：占位符CQL的Insert语句的执行。
-     * 
-     *   注意：不支持Delete语句
+     * 批量执行：占位符CQL的Create\Set\Delete语句的执行。
      * 
      * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
      * 
@@ -728,7 +742,9 @@ public class XCQLOPInsert
         int           v_Ret         = 0;
         long          v_BeginTime   = i_XCQL.request().getTime();
         String        v_CQL         = null;
-        int           v_CQLCount    = 0;
+        int           v_RowCount    = 0;
+        int           v_ColCount    = 0;
+        int           v_RelCount    = 0;
         
         try
         {
@@ -760,14 +776,14 @@ public class XCQLOPInsert
                 {
                     if ( i_ObjList.get(i) != null )
                     {
-                        v_CQL      = i_XCQL.getContent().getCQL(i_ObjList.get(i) ,v_DSCQL);
-                        v_Result   = v_Transaction.run(v_CQL);
-                        v_CQLCount = v_Result.consume().counters().nodesCreated()
-                                   + v_Result.consume().counters().relationshipsCreated();
-                        if ( v_CQLCount >= 1 )
-                        {
-                            v_Ret += v_CQLCount;
-                        }
+                        v_CQL       = i_XCQL.getContent().getCQL(i_ObjList.get(i) ,v_DSCQL);
+                        v_Result    = v_Transaction.run(v_CQL);
+                        v_RowCount += v_Result.consume().counters().nodesCreated()
+                                    + v_Result.consume().counters().nodesDeleted();
+                        v_ColCount += v_Result.consume().counters().propertiesSet();
+                        v_RelCount += v_Result.consume().counters().relationshipsCreated()
+                                    + v_Result.consume().counters().relationshipsDeleted();
+                        
                         i_XCQL.log(v_CQL);
                     }
                 }
@@ -785,14 +801,14 @@ public class XCQLOPInsert
                 {
                     if ( i_ObjList.get(i) != null )
                     {
-                        v_CQL      = i_XCQL.getContent().getCQL(i_ObjList.get(i) ,v_DSCQL);
-                        v_Result   = v_Transaction.run(v_CQL);
-                        v_CQLCount = v_Result.consume().counters().nodesCreated()
-                                   + v_Result.consume().counters().relationshipsCreated();
-                        if ( v_CQLCount >= 1 )
-                        {
-                            v_Ret += v_CQLCount;
-                        }
+                        v_CQL       = i_XCQL.getContent().getCQL(i_ObjList.get(i) ,v_DSCQL);
+                        v_Result    = v_Transaction.run(v_CQL);
+                        v_RowCount += v_Result.consume().counters().nodesCreated()
+                                    + v_Result.consume().counters().nodesDeleted();
+                        v_ColCount += v_Result.consume().counters().propertiesSet();
+                        v_RelCount += v_Result.consume().counters().relationshipsCreated()
+                                    + v_Result.consume().counters().relationshipsDeleted();
+                    
                         i_XCQL.log(v_CQL);
                         v_EC++;
                         
@@ -817,7 +833,7 @@ public class XCQLOPInsert
             Date v_EndTime = Date.getNowTime();
             long v_TimeLen = v_EndTime.getTime() - v_BeginTime;
             i_XCQL.success(v_EndTime ,v_TimeLen ,i_ObjList.size() ,v_Ret);
-            return new XCQLData(null ,v_Ret ,1 ,v_TimeLen ,null);
+            return new XCQLData(null ,v_RowCount ,v_ColCount ,v_RelCount ,v_TimeLen ,null);
         }
         catch (Exception exce)
         {

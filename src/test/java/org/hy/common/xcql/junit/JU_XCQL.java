@@ -1,9 +1,11 @@
 package org.hy.common.xcql.junit;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hy.common.Date;
 import org.hy.common.Help;
 import org.hy.common.xcql.XCQL;
 import org.hy.common.xcql.XCQLData;
@@ -43,6 +45,138 @@ public class JU_XCQL
             $isInit = true;
             XJava.parserAnnotation(JU_XCQL.class.getName());
         }
+    }
+    
+    
+    
+    /**
+     * 对象为参数，写入一个节点，方式1
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-07
+     * @version     v1.0
+     *
+     */
+    @Test
+    public void test_Insert_001_Object()
+    {
+        DataSourceConfig v_Param = new DataSourceConfig();
+        v_Param.setId("111");
+        v_Param.setDatabaseName("dataCenter");
+        v_Param.setCreateTime(new Date());
+        
+        XCQL     v_XCQL     = (XCQL) XJava.getObject("XCQL_Insert_001");
+        XCQLData v_XCQLData = v_XCQL.executeInsert(v_Param);
+        
+        $Logger.info(v_XCQLData.getRowCount());
+    }
+    
+    
+    
+    /**
+     * 对象为参数，写入一个节点，方式2
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-07
+     * @version     v1.0
+     *
+     */
+    @Test
+    public void test_Insert_002_Object()
+    {
+        DataSourceConfig v_Param = new DataSourceConfig();
+        v_Param.setId("222");
+        v_Param.setDatabaseName("dataCenter222");
+        v_Param.setCreateTime(new Date());
+        
+        XCQL v_XCQL  = (XCQL) XJava.getObject("XCQL_Insert_001");
+        int  v_Count = v_XCQL.executeUpdate(v_Param);
+        
+        $Logger.info(v_Count);
+    }
+    
+    
+    
+    /**
+     * Map为参数，写入一个节点
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-07
+     * @version     v1.0
+     *
+     */
+    @Test
+    public void test_Insert_003_Map()
+    {
+        Map<String ,Object> v_Param = new HashMap<String ,Object>();
+        v_Param.put("id"           ,"333");
+        v_Param.put("databaseName" ,"dataCenter");
+        v_Param.put("createTime"   ,new Date());
+        
+        XCQL v_XCQL  = (XCQL) XJava.getObject("XCQL_Insert_001");
+        int  v_Count = v_XCQL.executeUpdate(v_Param);
+        
+        $Logger.info(v_Count);
+    }
+    
+    
+    
+    /**
+     * 批量写入数据（统一提交、统一回滚），方式1
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-07
+     * @version     v1.0
+     *
+     */
+    @Test
+    public void test_Insert_004_Batch()
+    {
+        List<DataSourceConfig> v_Params = new ArrayList<DataSourceConfig>();
+        for (int x=1; x<=10; x++)
+        {
+            DataSourceConfig v_Param = new DataSourceConfig();
+            v_Param.setId("100" + x);
+            v_Param.setDatabaseName("dataCenter_" + v_Param.getId());
+            v_Param.setCreateTime(new Date());
+            
+            v_Params.add(v_Param);
+        }
+        
+        XCQL     v_XCQL  = (XCQL) XJava.getObject("XCQL_Insert_001");
+        XCQLData v_Count = v_XCQL.executeInserts(v_Params);
+        
+        $Logger.info(v_Count.getRowCount());
+    }
+    
+    
+    
+    /**
+     * 批量写入数据（统一提交、统一回滚），方式2
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-07
+     * @version     v1.0
+     *
+     */
+    @Test
+    public void test_Insert_005_Batch()
+    {
+        List<DataSourceConfig> v_Params = new ArrayList<DataSourceConfig>();
+        for (int x=1; x<=10; x++)
+        {
+            DataSourceConfig v_Param = new DataSourceConfig();
+            v_Param.setId("200" + x);
+            v_Param.setDatabaseName("dataCenter_" + v_Param.getId());
+            v_Param.setCreateTime(new Date());
+            
+            v_Params.add(v_Param);
+        }
+        
+        XCQL v_XCQL  = (XCQL) XJava.getObject("XCQL_Insert_001");
+        int  v_Count = v_XCQL.executeUpdates(v_Params);
+        
+        $Logger.info(v_Count);
     }
     
     

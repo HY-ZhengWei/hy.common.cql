@@ -17,7 +17,7 @@ import org.neo4j.driver.Transaction;
 
 
 /**
- * XCQL功能中SET\Delete语句的具体操作与实现。
+ * XCQL功能中Create\Set\Delete语句的具体操作与实现。
  * 
  * 独立原因：从XCQL主类中分离的主要原因是：减少XCQL主类的代码量，方便维护。使XCQL主类向外提供统一的操作，本类重点关注实现。
  * 静态原因：用static方法的原因：不想再构建太多的类实例，减少内存负担
@@ -31,9 +31,9 @@ public class XCQLOPUpdate
 {
     
     /**
-     * 占位符CQL的Insert语句与Update语句的执行。 -- 无填充值的
+     * 占位符CQL的Create\Set\Delete语句的执行。 -- 无填充值的
      * 
-     * @return  返回语句影响的记录数。
+     * @return  返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     public static int executeUpdate(final XCQL i_XCQL)
     {
@@ -80,14 +80,12 @@ public class XCQLOPUpdate
     
     
     /**
-     * 占位符CQL的Insert语句与Update语句的执行。
+     * 占位符CQL的Create\Set\Delete语句的执行。
      * 
      * 1. 按集合 Map<String ,Object> 填充占位符CQL，生成可执行的CQL语句；
      * 
-     * V2.0  2018-07-18  1.添加：支持CLob字段类型的简单Insert、Update语法的写入操作。
-     * 
      * @param i_Values  占位符CQL的填充集合。
-     * @return  返回语句影响的记录数。
+     * @return          返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     public static int executeUpdate(final XCQL i_XCQL ,final Map<String ,?> i_Values)
     {
@@ -137,14 +135,12 @@ public class XCQLOPUpdate
     
     
     /**
-     * 占位符CQL的Insert语句与Update语句的执行。
+     * 占位符CQL的Create\Set\Delete语句的执行。
      * 
      * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
      * 
-     * V2.0  2018-07-18  1.添加：支持CLob字段类型的简单Insert、Update语法的写入操作。
-     * 
      * @param i_Obj  占位符CQL的填充对象。
-     * @return  返回语句影响的记录数。
+     * @return       返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     public static int executeUpdate(final XCQL i_XCQL ,final Object i_Obj)
     {
@@ -193,10 +189,10 @@ public class XCQLOPUpdate
     
     
     /**
-     * 常规Insert语句与Update语句的执行。
+     * 常规Create\Set\Delete语句的执行。
      * 
      * @param i_CQL  常规CQL语句
-     * @return  返回语句影响的记录数。
+     * @return       返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     public static int executeUpdate(final XCQL i_XCQL ,final String i_CQL)
     {
@@ -237,10 +233,10 @@ public class XCQLOPUpdate
     
     
     /**
-     * 常规Insert语句与Update语句的执行。
+     * 常规Create\Set\Delete语句的执行。
      * 
-     * @param i_CQL              常规CQL语句
-     * @return                   返回语句影响的记录数。
+     * @param i_CQL  常规CQL语句
+     * @return       返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     private static int executeUpdate_Inner(final XCQL i_XCQL ,final String i_CQL ,final DataSourceCQL i_DSG)
     {
@@ -262,9 +258,16 @@ public class XCQLOPUpdate
             
             v_Conn   = i_XCQL.getConnection(i_DSG);
             v_Result = v_Conn.run(i_CQL);
-            int v_Count = v_Result.consume().counters().propertiesSet()
+            
+            int v_Count = v_Result.consume().counters().nodesCreated()
                         + v_Result.consume().counters().nodesDeleted()
+                        + v_Result.consume().counters().relationshipsCreated()
                         + v_Result.consume().counters().relationshipsDeleted();
+            // 当并非创建、删除节点和关系时，才取对属性的操作数量
+            if ( v_Count <= 0 )
+            {
+                v_Count = v_Result.consume().counters().propertiesSet();
+            }
             
             i_XCQL.log(i_CQL);
             
@@ -287,10 +290,10 @@ public class XCQLOPUpdate
     
     
     /**
-     * 占位符CQL的Insert语句与Update语句的执行。 -- 无填充值的（内部不再关闭数据库连接）
+     * 占位符CQL的Create\Set\Delete语句的执行。 -- 无填充值的（内部不再关闭数据库连接）
      * 
      * @param i_Conn  数据库连接
-     * @return  返回语句影响的记录数。
+     * @return        返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     public static int executeUpdate(final XCQL i_XCQL ,final Connection i_Conn)
     {
@@ -337,13 +340,13 @@ public class XCQLOPUpdate
     
     
     /**
-     * 占位符CQL的Insert语句与Update语句的执行。（内部不再关闭数据库连接）
+     * 占位符CQL的Create\Set\Delete语句的执行。（内部不再关闭数据库连接）
      * 
      * 1. 按集合 Map<String ,Object> 填充占位符CQL，生成可执行的CQL语句；
      * 
      * @param i_Values 占位符CQL的填充集合。
      * @param i_Conn   数据库连接
-     * @return  返回语句影响的记录数。
+     * @return         返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     public static int executeUpdate(final XCQL i_XCQL ,final Map<String ,?> i_Values ,Connection i_Conn)
     {
@@ -391,13 +394,13 @@ public class XCQLOPUpdate
     
     
     /**
-     * 占位符CQL的Insert语句与Update语句的执行。（内部不再关闭数据库连接）
+     * 占位符CQL的Create\Set\Delete语句的执行。（内部不再关闭数据库连接）
      * 
      * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
      * 
      * @param i_Obj   占位符CQL的填充对象。
      * @param i_Conn  数据库连接
-     * @return  返回语句影响的记录数。
+     * @return        返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     public static int executeUpdate(final XCQL i_XCQL ,final Object i_Obj ,Connection i_Conn)
     {
@@ -445,13 +448,11 @@ public class XCQLOPUpdate
     
     
     /**
-     * 常规Insert语句与Update语句的执行。（内部不再关闭数据库连接）
+     * 常规Create\Set\Delete语句的执行。（内部不再关闭数据库连接）
      * 
      * @param i_CQL   常规CQL语句
      * @param i_Conn  数据库连接
-     * @return  返回语句影响的记录数。
-     *            当 getID=false 时，返回值表示：影响的记录行数
-     *            当 getID=true  时，返回值表示：写入首条记录的自增长ID的值。影响0行时，返回0
+     * @return        返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     public static int executeUpdate(final XCQL i_XCQL ,final String i_CQL ,Connection i_Conn)
     {
@@ -492,12 +493,12 @@ public class XCQLOPUpdate
     
     
     /**
-     * 常规Insert语句与Update语句的执行。（内部不再关闭数据库连接）
+     * 常规Create\Set\Delete语句的执行。（内部不再关闭数据库连接）
      * 
      * @param i_XCQL  XCQL对象
      * @param i_CQL   常规CQL语句
      * @param i_Conn  数据库连接
-     * @return  返回语句影响的记录数。
+     * @return        返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     private static int executeUpdate_Inner(final XCQL i_XCQL ,final String i_CQL ,Connection i_Conn)
     {
@@ -517,9 +518,17 @@ public class XCQLOPUpdate
             }
             
             v_Result = i_Conn.run(i_CQL);
-            int v_Count = v_Result.consume().counters().propertiesSet()
+            
+            int v_Count = v_Result.consume().counters().nodesCreated()
                         + v_Result.consume().counters().nodesDeleted()
+                        + v_Result.consume().counters().relationshipsCreated()
                         + v_Result.consume().counters().relationshipsDeleted();
+            // 当并非创建、删除节点和关系时，才取对属性的操作数量
+            if ( v_Count <= 0 )
+            {
+                v_Count = v_Result.consume().counters().propertiesSet();
+            }
+            
             i_XCQL.log(i_CQL);
             
             Date v_EndTime = Date.getNowTime();
@@ -541,17 +550,17 @@ public class XCQLOPUpdate
     
     
     /**
-     * 批量执行：占位符CQL的Insert语句与Update语句的执行。
+     * 批量执行：占位符CQL的Create\Set\Delete语句的执行。
      * 
      * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
      * 
      * 注：只支持单一CQL语句的执行
      * 
-     * @param i_ObjList          占位符CQL的填充对象的集合。
+     * @param i_ObjList  占位符CQL的填充对象的集合。
      *                           1. 集合元素可以是Object
      *                           2. 集合元素可以是Map<String ,?>
      *                           3. 更可以是上面两者的混合元素组成的集合
-     * @return  返回语句影响的记录数。
+     * @return           返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     public static int executeUpdates(final XCQL i_XCQL ,final List<?> i_ObjList)
     {
@@ -595,7 +604,7 @@ public class XCQLOPUpdate
     
     
     /**
-     * 批量执行：占位符CQL的Insert语句与Update语句的执行。
+     * 批量执行：占位符CQL的Create\Set\Delete语句的执行。
      * 
      *   注意：不支持Delete语句
      * 
@@ -603,16 +612,16 @@ public class XCQLOPUpdate
      * 
      * 注：只支持单一CQL语句的执行
      * 
-     * @param i_ObjList          占位符CQL的填充对象的集合。
-     *                           1. 集合元素可以是Object
-     *                           2. 集合元素可以是Map<String ,?>
-     *                           3. 更可以是上面两者的混合元素组成的集合
-     * @param i_Conn             数据库连接。
-     *                           1. 当为空时，内部自动获取一个新的数据库连接。
-     *                           2. 当有值时，内部将不关闭数据库连接，而是交给外部调用者来关闭。
-     *                           3. 当有值时，内部也不执行"提交"操作（但分批提交i_XCQL.getBatchCommit()大于0时除外），而是交给外部调用者来执行"提交"。
-     *                           4. 当有值时，出现异常时，内部也不执行"回滚"操作，而是交给外部调用者来执行"回滚"。
-     * @return  返回语句影响的记录数。
+     * @param i_ObjList  占位符CQL的填充对象的集合。
+     *                   1. 集合元素可以是Object
+     *                   2. 集合元素可以是Map<String ,?>
+     *                   3. 更可以是上面两者的混合元素组成的集合
+     * @param i_Conn     数据库连接。
+     *                   1. 当为空时，内部自动获取一个新的数据库连接。
+     *                   2. 当有值时，内部将不关闭数据库连接，而是交给外部调用者来关闭。
+     *                   3. 当有值时，内部也不执行"提交"操作（但分批提交i_XCQL.getBatchCommit()大于0时除外），而是交给外部调用者来执行"提交"。
+     *                   4. 当有值时，出现异常时，内部也不执行"回滚"操作，而是交给外部调用者来执行"回滚"。
+     * @return           返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     public static int executeUpdates(final XCQL i_XCQL ,final List<?> i_ObjList ,Connection i_Conn)
     {
@@ -656,7 +665,7 @@ public class XCQLOPUpdate
     
     
     /**
-     * 批量执行：占位符CQL的Insert语句与Update语句的执行。
+     * 批量执行：占位符CQL的Create\Set\Delete语句的执行。
      * 
      *   注意：不支持Delete语句
      * 
@@ -664,16 +673,16 @@ public class XCQLOPUpdate
      * 
      * 注：只支持单一CQL语句的执行
      * 
-     * @param i_ObjList          占位符CQL的填充对象的集合。
-     *                           1. 集合元素可以是Object
-     *                           2. 集合元素可以是Map<String ,?>
-     *                           3. 更可以是上面两者的混合元素组成的集合
-     * @param i_Conn             数据库连接。
-     *                           1. 当为空时，内部自动获取一个新的数据库连接。
-     *                           2. 当有值时，内部将不关闭数据库连接，而是交给外部调用者来关闭。
-     *                           3. 当有值时，内部也不执行"提交"操作（但分批提交i_XCQL.getBatchCommit()大于0时除外），而是交给外部调用者来执行"提交"。
-     *                           4. 当有值时，出现异常时，内部也不执行"回滚"操作，而是交给外部调用者来执行"回滚"。
-     * @return                   返回语句影响的记录数。
+     * @param i_ObjList  占位符CQL的填充对象的集合。
+     *                   1. 集合元素可以是Object
+     *                   2. 集合元素可以是Map<String ,?>
+     *                   3. 更可以是上面两者的混合元素组成的集合
+     * @param i_Conn     数据库连接。
+     *                   1. 当为空时，内部自动获取一个新的数据库连接。
+     *                   2. 当有值时，内部将不关闭数据库连接，而是交给外部调用者来关闭。
+     *                   3. 当有值时，内部也不执行"提交"操作（但分批提交i_XCQL.getBatchCommit()大于0时除外），而是交给外部调用者来执行"提交"。
+     *                   4. 当有值时，出现异常时，内部也不执行"回滚"操作，而是交给外部调用者来执行"回滚"。
+     * @return           返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     private static int executeUpdates_Inner(final XCQL i_XCQL ,final List<?> i_ObjList ,final Connection i_Conn)
     {
@@ -718,9 +727,17 @@ public class XCQLOPUpdate
                     {
                         v_CQL      = i_XCQL.getContent().getCQL(i_ObjList.get(i) ,v_DSCQL);
                         v_Result   = v_Transaction.run(v_CQL);
-                        v_CQLCount = v_Result.consume().counters().propertiesSet()
+                        v_CQLCount = v_Result.consume().counters().nodesCreated()
                                    + v_Result.consume().counters().nodesDeleted()
+                                   + v_Result.consume().counters().relationshipsCreated()
                                    + v_Result.consume().counters().relationshipsDeleted();
+                        
+                        // 当并非创建、删除节点和关系时，才取对属性的操作数量
+                        if ( v_CQLCount <= 0 )
+                        {
+                            v_CQLCount = v_Result.consume().counters().propertiesSet();
+                        }
+                        
                         if ( v_CQLCount >= 1 )
                         {
                             v_Ret += v_CQLCount;
@@ -744,9 +761,17 @@ public class XCQLOPUpdate
                     {
                         v_CQL      = i_XCQL.getContent().getCQL(i_ObjList.get(i) ,v_DSCQL);
                         v_Result   = v_Transaction.run(v_CQL);
-                        v_CQLCount = v_Result.consume().counters().propertiesSet()
+                        v_CQLCount = v_Result.consume().counters().nodesCreated()
                                    + v_Result.consume().counters().nodesDeleted()
+                                   + v_Result.consume().counters().relationshipsCreated()
                                    + v_Result.consume().counters().relationshipsDeleted();
+                     
+                        // 当并非创建、删除节点和关系时，才取对属性的操作数量
+                        if ( v_CQLCount <= 0 )
+                        {
+                            v_CQLCount = v_Result.consume().counters().propertiesSet();
+                        }
+                        
                         if ( v_CQLCount >= 1 )
                         {
                             v_Ret += v_CQLCount;
@@ -810,7 +835,7 @@ public class XCQLOPUpdate
     
     
     /**
-     * 批量执行：占位符CQL的Insert语句与Update语句的执行。
+     * 批量执行：占位符CQL的Create\Set\Delete语句的执行。
      * 
      * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
      * 
@@ -822,13 +847,13 @@ public class XCQLOPUpdate
      *         建议入参使用 TablePartition。为什么呢？
      *         原因是，Hashtable.put() 同样的key多次，只保存一份value。
      *         而 TablePartition.putRows() 会将同样key的多份不同的value整合在一起。
-     *         特别适应于同一份Insert语句的CQL，执行多批数据的插入的情况
+     *         特别适应于同一份Create\Set\Delete语句的CQL，执行多批数据的插入的情况
      * 
-     * @param i_XCQLs            XCQL及占位符CQL的填充对象的集合。
-     *                           1. List<?>集合元素可以是Object
-     *                           2. List<?>集合元素可以是Map<String ,?>
-     *                           3. List<?>更可以是上面两者的混合元素组成的集合
-     * @return                   返回语句影响的记录数。
+     * @param i_XCQLs   XCQL及占位符CQL的填充对象的集合。
+     *                  1. List<?>集合元素可以是Object
+     *                  2. List<?>集合元素可以是Map<String ,?>
+     *                  3. List<?>更可以是上面两者的混合元素组成的集合
+     * @return          返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     @SuppressWarnings({"unchecked" ,"rawtypes"})
     public static int executeUpdates(final PartitionMap<XCQL ,?> i_XCQLs)
@@ -839,7 +864,7 @@ public class XCQLOPUpdate
     
     
     /**
-     * 批量执行：占位符CQL的Insert语句与Update语句的执行。
+     * 批量执行：占位符CQL的Create\Set\Delete语句的执行。
      * 
      * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
      * 
@@ -851,13 +876,13 @@ public class XCQLOPUpdate
      *         建议入参使用 TablePartition。为什么呢？
      *         原因是，Hashtable.put() 同样的key多次，只保存一份value。
      *         而 TablePartition.putRows() 会将同样key的多份不同的value整合在一起。
-     *         特别适应于同一份Insert语句的CQL，执行多批数据的插入的情况
+     *         特别适应于同一份Create\Set\Delete语句的CQL，执行多批数据的插入的情况
      * 
-     * @param i_XCQLs            XCQL及占位符CQL的填充对象的集合。
-     *                           1. List<?>集合元素可以是Object
-     *                           2. List<?>集合元素可以是Map<String ,?>
-     *                           3. List<?>更可以是上面两者的混合元素组成的集合
-     * @return                   返回语句影响的记录数。
+     * @param i_XCQLs  XCQL及占位符CQL的填充对象的集合。
+     *                 1. List<?>集合元素可以是Object
+     *                 2. List<?>集合元素可以是Map<String ,?>
+     *                 3. List<?>更可以是上面两者的混合元素组成的集合
+     * @return         返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     public static int executeUpdates(final Map<XCQL ,List<?>> i_XCQLs)
     {
@@ -867,7 +892,7 @@ public class XCQLOPUpdate
     
     
     /**
-     * 批量执行：占位符CQL的Insert语句与Update语句的执行。
+     * 批量执行：占位符CQL的Create\Set\Delete语句的执行。
      * 
      * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
      * 
@@ -880,14 +905,14 @@ public class XCQLOPUpdate
      *         为什么呢？
      *         原因是，Hashtable.put() 同样的key多次，只保存一份value。
      *         而 TablePartition.putRows() 会将同样key的多份不同的value整合在一起。
-     *         特别适应于同一份Insert语句的CQL，执行多批数据的插入的情况
+     *         特别适应于同一份Create语句的CQL，执行多批数据的插入的情况
      * 
-     * @param i_XCQLs            XCQL及占位符CQL的填充对象的集合。
-     *                           1. List<?>集合元素可以是Object
-     *                           2. List<?>集合元素可以是Map<String ,?>
-     *                           3. List<?>更可以是上面两者的混合元素组成的集合
-     * @param i_BatchCommit      批量执行 Insert、Update、Delete 时，达到提交的提交点
-     * @return                   返回语句影响的记录数。
+     * @param i_XCQLs        XCQL及占位符CQL的填充对象的集合。
+     *                       1. List<?>集合元素可以是Object
+     *                       2. List<?>集合元素可以是Map<String ,?>
+     *                       3. List<?>更可以是上面两者的混合元素组成的集合
+     * @param i_BatchCommit  批量执行 Create\Set\Delete 时，达到提交的提交点
+     * @return               返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
     public static <R> int executeUpdates(final Map<XCQL ,List<?>> i_XCQLs ,final int i_BatchCommit)
     {

@@ -784,7 +784,7 @@ public final class XCQLResult
             }
         }
         
-        return new XCQLData(v_Table ,v_RowNo ,this.cfillMethodArr.size() ,Date.getNowTime().differ(v_ExecBeginTime) ,this.dbMetaData);
+        return new XCQLData(v_Table ,v_RowNo ,this.cfillMethodArr.size() ,0 ,Date.getNowTime().differ(v_ExecBeginTime) ,this.dbMetaData);
     }
     
     

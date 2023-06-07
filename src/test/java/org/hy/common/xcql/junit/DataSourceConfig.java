@@ -1,5 +1,6 @@
 package org.hy.common.xcql.junit;
 
+import org.hy.common.Date;
 import org.hy.common.XJavaID;
 
 
@@ -69,6 +70,9 @@ public class DataSourceConfig implements XJavaID
     
     /** 备注说明 */
     private String  comment;
+    
+    /** 创建时间 */
+    private Date    createTime;
 
     
     
@@ -464,6 +468,28 @@ public class DataSourceConfig implements XJavaID
     public void setFailFast(Boolean i_FailFast)
     {
         this.failFast = i_FailFast;
+    }
+
+
+    
+    /**
+     * 获取：创建时间
+     */
+    public Date getCreateTime()
+    {
+        return createTime;
+    }
+
+    
+    
+    /**
+     * 设置：创建时间
+     * 
+     * @param i_CreateTime 创建时间
+     */
+    public void setCreateTime(Date i_CreateTime)
+    {
+        this.createTime = i_CreateTime;
     }
     
 }

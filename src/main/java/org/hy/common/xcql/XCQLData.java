@@ -25,6 +25,9 @@ public class XCQLData
     /** 将数据库结果集转化为Java实例对象的列数(有效列数) */
     private int             colCount;
     
+    /** 将数据库结果集转化为Java实例对象的关系的数量 */
+    private long            relCount;
+    
     /** 将数据库结果集转化为Java实例对象的用时时长(单位：毫秒) */
     private long            timeLen;
     
@@ -33,11 +36,12 @@ public class XCQLData
     
     
     
-    public XCQLData(Object i_Datas ,long i_RowCount ,int i_ColCount ,long i_TimeLen ,DBTableMetaData i_MetaData)
+    public XCQLData(Object i_Datas ,long i_RowCount ,int i_ColCount ,long i_RelCount,long i_TimeLen ,DBTableMetaData i_MetaData)
     {
         this.datas     = i_Datas;
         this.rowCount  = i_RowCount;
         this.colCount  = i_ColCount;
+        this.relCount  = i_RelCount;
         this.timeLen   = i_TimeLen;
         this.metaData  = i_MetaData;
     }
@@ -90,6 +94,28 @@ public class XCQLData
     public DBTableMetaData getMetaData()
     {
         return metaData;
+    }
+
+
+    
+    /**
+     * 获取：将数据库结果集转化为Java实例对象的关系的数量
+     */
+    public long getRelCount()
+    {
+        return relCount;
+    }
+
+
+    
+    /**
+     * 设置：将数据库结果集转化为Java实例对象的关系的数量
+     * 
+     * @param i_RelCount 将数据库结果集转化为Java实例对象的关系的数量
+     */
+    public void setRelCount(long i_RelCount)
+    {
+        this.relCount = i_RelCount;
     }
     
 }

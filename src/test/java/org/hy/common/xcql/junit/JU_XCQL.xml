@@ -18,6 +18,24 @@
         </dataSourceCQL>
         
         
+        
+        <cql id="XCQL_Insert_001"> 
+        
+            <dataSourceCQL ref="DSCQL_001" />
+        
+            <content>
+                <![CDATA[
+                CREATE (:`测试` {id: #id ,databaseName: '#databaseName' ,createTime: '#createTime'})
+                ]]>
+            </content>
+            
+            <result>
+                <row>org.hy.common.xcql.junit.DataSourceConfig</row>
+                <cfill>setter(colValue)</cfill>
+            </result>
+        </cql>
+        
+        
 
         <cql id="XCQL_Query_001_ReturnListMap"> 
         
@@ -88,7 +106,6 @@
                 <cfill>setter(colValue)</cfill>
             </result>
         </cql>
-        
         
         
     </cqls>

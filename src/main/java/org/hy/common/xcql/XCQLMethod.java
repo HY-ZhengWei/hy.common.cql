@@ -12,7 +12,9 @@ import org.hy.common.Help;
 import org.hy.common.MethodReflect;
 import org.hy.common.StaticReflect;
 import org.hy.common.StringHelp;
-import org.neo4j.driver.types.MapAccessorWithDefaultValue;
+import org.neo4j.driver.Value;
+import org.neo4j.driver.internal.types.InternalTypeSystem;
+import org.neo4j.driver.types.Type;
 
 
 
@@ -161,7 +163,7 @@ public final class XCQLMethod
                             
                             if ( !v_ValuesIsNull )
                             {
-                                v_CollectionElementTemp = this.collectionElement.newInstance();
+                                v_CollectionElementTemp = this.collectionElement.getDeclaredConstructor().newInstance();
                                 ((List<Object>)v_FatherTemp).add(v_CollectionElementTemp);
                             }
                         }
@@ -171,13 +173,13 @@ public final class XCQLMethod
                             
                             if ( !v_ValuesIsNull )
                             {
-                                v_CollectionElementTemp = this.collectionElement.newInstance();
+                                v_CollectionElementTemp = this.collectionElement.getDeclaredConstructor().newInstance();
                                 ((Set<Object>)v_FatherTemp).add(v_CollectionElementTemp);
                             }
                         }
                         else
                         {
-                            v_FatherTemp = this.getInstanceOfMethod.getReturnType().newInstance();
+                            v_FatherTemp = this.getInstanceOfMethod.getReturnType().getDeclaredConstructor().newInstance();
                         }
                     }
                     catch (Exception exce)
@@ -201,7 +203,7 @@ public final class XCQLMethod
                         {
                             if ( !v_ValuesIsNull )
                             {
-                                v_CollectionElementTemp = this.collectionElement.newInstance();
+                                v_CollectionElementTemp = this.collectionElement.getDeclaredConstructor().newInstance();
                                 v_CollectionTemp.add(v_CollectionElementTemp);
                             }
                         }
@@ -226,7 +228,7 @@ public final class XCQLMethod
                         {
                             if ( !v_ValuesIsNull )
                             {
-                                v_CollectionElementTemp = this.collectionElement.newInstance();
+                                v_CollectionElementTemp = this.collectionElement.getDeclaredConstructor().newInstance();
                                 v_CollectionTemp.add(v_CollectionElementTemp);
                             }
                         }
@@ -285,9 +287,15 @@ public final class XCQLMethod
      * 按 call 方法的入参类型，决定 org.neo4j.driver.Result 获取字段值的方法
      * 
      * 当 XCQLResult.cfill 等于 "setter(colValue)" 时（即，XCQLResult.$CFILL_METHOD_VARY），此值才会有效。
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-07
+     * @version     v1.0
+     *
+     * @param i_Neo4jFieldType   Neo4j的属性类型。这里假设：同一属性的类型是一致的哈
      */
     @SuppressWarnings("unchecked")
-    public void parseResultSet_Getter()
+    public void parseResultSet_Getter(Type i_Neo4jFieldType)
     {
         if ( this.call == null )
         {
@@ -299,70 +307,142 @@ public final class XCQLMethod
         
         try
         {
-            this.machiningValue = new MachiningDefault();
-            
-            if ( v_SetterParamClass == String.class )
+            if ( InternalTypeSystem.TYPE_SYSTEM.STRING().equals(i_Neo4jFieldType) )
             {
-                this.resultSet_Getter = MapAccessorWithDefaultValue.class.getDeclaredMethod("get" ,String.class ,String.class);
+                this.resultSet_Getter = Value.class.getDeclaredMethod("asString");
+                
+                if ( v_SetterParamClass == String.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningDefault;
+                }
+                else if ( v_SetterParamClass == int.class
+                       || v_SetterParamClass == Integer.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningStringToInteger;
+                }
+                else if ( v_SetterParamClass == BigDecimal.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningStringToBigDecimal;
+                }
+                else if ( v_SetterParamClass == double.class
+                       || v_SetterParamClass == Double.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningStringToDouble;
+                }
+                else if ( v_SetterParamClass == Date.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningMyDate;
+                }
+                else if ( v_SetterParamClass == java.util.Date.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningDate;
+                }
+                else if ( v_SetterParamClass == boolean.class
+                       || v_SetterParamClass == Boolean.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningStringToBoolean;
+                }
+                else if ( v_SetterParamClass == long.class
+                       || v_SetterParamClass == Long.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningStringToLong;
+                }
+                else if ( v_SetterParamClass == short.class
+                       || v_SetterParamClass == Short.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningStringToShort;
+                }
+                else if ( v_SetterParamClass == byte.class
+                       || v_SetterParamClass == Byte.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningStringToByte;
+                }
+                else if ( v_SetterParamClass == byte[].class
+                       || v_SetterParamClass == Byte[].class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningStringToByteArray;
+                }
+                else if ( MethodReflect.isExtendImplement(v_SetterParamClass ,Enum.class) )
+                {
+                    this.machiningValue = new MachiningEnum((Class<? extends Enum<?>>)v_SetterParamClass);
+                }
+                else
+                {
+                    this.machiningValue = MachiningDefault.$MachiningDefault;
+                }
             }
-            else if ( v_SetterParamClass == int.class
-                   || v_SetterParamClass == Integer.class )
+            else if ( InternalTypeSystem.TYPE_SYSTEM.BOOLEAN().equals(i_Neo4jFieldType) )
             {
-                this.resultSet_Getter = MapAccessorWithDefaultValue.class.getDeclaredMethod("get" ,String.class ,int.class);
+                this.resultSet_Getter = Value.class.getDeclaredMethod("asBoolean");
+                
+                if ( v_SetterParamClass == boolean.class
+                  || v_SetterParamClass == Boolean.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningDefault;
+                }
+                else if ( v_SetterParamClass == int.class
+                       || v_SetterParamClass == Integer.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningBooleanToInteger;
+                }
+                else if ( v_SetterParamClass == String.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningToString;
+                }
+                else
+                {
+                    this.machiningValue = MachiningDefault.$MachiningDefault;
+                }
             }
-            else if ( v_SetterParamClass == BigDecimal.class )
+            else if ( InternalTypeSystem.TYPE_SYSTEM.INTEGER().equals(i_Neo4jFieldType) )
             {
-                this.resultSet_Getter = MapAccessorWithDefaultValue.class.getDeclaredMethod("get" ,String.class ,double.class);
+                if ( v_SetterParamClass == int.class
+                  || v_SetterParamClass == Integer.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningDefault;
+                }
+                else if ( v_SetterParamClass == boolean.class
+                       || v_SetterParamClass == Boolean.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningIntegerToBoolean;
+                }
+                else if ( v_SetterParamClass == BigDecimal.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningIntegerToBigDecimal;
+                }
+                else if ( v_SetterParamClass == double.class
+                       || v_SetterParamClass == Double.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningIntegerToDouble;
+                }
+                else if ( v_SetterParamClass == long.class
+                       || v_SetterParamClass == Long.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningIntegerToLong;
+                }
+                else if ( v_SetterParamClass == short.class
+                       || v_SetterParamClass == Short.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningIntegerToShort;
+                }
+                else if ( v_SetterParamClass == String.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningToString;
+                }
+                else
+                {
+                    this.machiningValue = MachiningDefault.$MachiningDefault;
+                }
             }
-            else if ( v_SetterParamClass == double.class
-                   || v_SetterParamClass == Double.class )
+            else if ( InternalTypeSystem.TYPE_SYSTEM.FLOAT().equals(i_Neo4jFieldType) )
             {
-                this.resultSet_Getter = MapAccessorWithDefaultValue.class.getDeclaredMethod("get" ,String.class ,double.class);
-            }
-            else if ( v_SetterParamClass == Date.class )
-            {
-                this.resultSet_Getter = MapAccessorWithDefaultValue.class.getDeclaredMethod("get" ,String.class ,String.class);
-                this.machiningValue   = new MachiningMyDate();
-            }
-            else if ( v_SetterParamClass == java.util.Date.class )
-            {
-                this.resultSet_Getter = MapAccessorWithDefaultValue.class.getDeclaredMethod("get" ,String.class ,String.class);
-                this.machiningValue   = new MachiningDate();
-            }
-            else if ( v_SetterParamClass == boolean.class
-                   || v_SetterParamClass == Boolean.class )
-            {
-                this.resultSet_Getter = MapAccessorWithDefaultValue.class.getDeclaredMethod("get" ,String.class ,boolean.class);
-            }
-            else if ( v_SetterParamClass == long.class
-                   || v_SetterParamClass == Long.class )
-            {
-                this.resultSet_Getter = MapAccessorWithDefaultValue.class.getDeclaredMethod("get" ,String.class ,long.class);
-            }
-            else if ( v_SetterParamClass == short.class
-                   || v_SetterParamClass == Short.class )
-            {
-                this.resultSet_Getter = MapAccessorWithDefaultValue.class.getDeclaredMethod("get" ,String.class ,int.class);
-            }
-            else if ( v_SetterParamClass == byte.class
-                   || v_SetterParamClass == Byte.class )
-            {
-                this.resultSet_Getter = MapAccessorWithDefaultValue.class.getDeclaredMethod("get" ,String.class ,int.class);
-            }
-            else if ( v_SetterParamClass == byte[].class
-                   || v_SetterParamClass == Byte[].class )
-            {
-                 this.resultSet_Getter = MapAccessorWithDefaultValue.class.getDeclaredMethod("get" ,String.class ,String.class);
-            }
-            else if ( MethodReflect.isExtendImplement(v_SetterParamClass ,Enum.class) )
-            {
-                // 从原来的getInt方法改为getString方法，支持数字、字符类型的常量类  ZhengWei(HY) Edit 2018-05-11
-                this.resultSet_Getter = MapAccessorWithDefaultValue.class.getDeclaredMethod("get" ,String.class ,int.class);
-                this.machiningValue   = new MachiningEnum((Class<? extends Enum<?>>)v_SetterParamClass);
+                this.resultSet_Getter = Value.class.getDeclaredMethod("asDouble");
+                this.machiningValue   = MachiningDefault.$MachiningDefault;
             }
             else
             {
-                this.resultSet_Getter = MapAccessorWithDefaultValue.class.getDeclaredMethod("get" ,String.class ,String.class);
+                this.resultSet_Getter = Value.class.getDeclaredMethod("asString");
+                this.machiningValue   = MachiningDefault.$MachiningDefault;
             }
         }
         catch (Exception exce)
@@ -578,11 +658,237 @@ interface MachiningValue<R ,V>
  */
 class MachiningDefault implements MachiningValue<Object ,Object>
 {
+    /** 单例化：减少重复创建对象实例，减少内存占用 */
+    public static final MachiningDefault             $MachiningDefault             = new MachiningDefault();
+    public static final MachiningToString            $MachiningToString            = new MachiningToString();
+    public static final MachiningStringToInteger     $MachiningStringToInteger     = new MachiningStringToInteger();
+    public static final MachiningStringToBigDecimal  $MachiningStringToBigDecimal  = new MachiningStringToBigDecimal();
+    public static final MachiningStringToDouble      $MachiningStringToDouble      = new MachiningStringToDouble();
+    public static final MachiningStringToBoolean     $MachiningStringToBoolean     = new MachiningStringToBoolean();
+    public static final MachiningStringToLong        $MachiningStringToLong        = new MachiningStringToLong();
+    public static final MachiningStringToShort       $MachiningStringToShort       = new MachiningStringToShort();
+    public static final MachiningStringToByte        $MachiningStringToByte        = new MachiningStringToByte();
+    public static final MachiningStringToByteArray   $MachiningStringToByteArray   = new MachiningStringToByteArray();
+    public static final MachiningDate                $MachiningDate                = new MachiningDate();
+    public static final MachiningMyDate              $MachiningMyDate              = new MachiningMyDate();
+    public static final MachiningBooleanToInteger    $MachiningBooleanToInteger    = new MachiningBooleanToInteger();
+    public static final MachiningIntegerToBoolean    $MachiningIntegerToBoolean    = new MachiningIntegerToBoolean();
+    public static final MachiningIntegerToBigDecimal $MachiningIntegerToBigDecimal = new MachiningIntegerToBigDecimal();
+    public static final MachiningIntegerToDouble     $MachiningIntegerToDouble     = new MachiningIntegerToDouble();
+    public static final MachiningIntegerToLong       $MachiningIntegerToLong       = new MachiningIntegerToLong();
+    public static final MachiningIntegerToShort      $MachiningIntegerToShort      = new MachiningIntegerToShort();
+    
+    
 
     @Override
     public Object getValue(Object i_Value)
     {
         return i_Value;
+    }
+    
+}
+
+
+
+
+
+/**
+ * 任意类转为字符串的默认方法的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-07
+ */
+class MachiningToString implements MachiningValue<String ,Object>
+{
+
+    @Override
+    public String getValue(Object i_Value)
+    {
+        if ( i_Value != null )
+        {
+            return i_Value.toString();
+        }
+        else
+        {
+            return null;
+        }
+    }
+    
+}
+
+
+
+
+
+/**
+ * 图数据库的String转Java的Integer的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-07
+ */
+class MachiningStringToInteger implements MachiningValue<Integer ,String>
+{
+
+    @Override
+    public Integer getValue(String i_Value)
+    {
+        return Integer.valueOf(i_Value);
+    }
+    
+}
+
+
+
+
+
+/**
+ * 图数据库的String转Java的BigDecimal的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-07
+ */
+class MachiningStringToBigDecimal implements MachiningValue<BigDecimal ,String>
+{
+
+    @Override
+    public BigDecimal getValue(String i_Value)
+    {
+        return new BigDecimal(i_Value);
+    }
+    
+}
+
+
+
+
+
+/**
+ * 图数据库的String转Java的Double的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-07
+ */
+class MachiningStringToDouble implements MachiningValue<Double ,String>
+{
+
+    @Override
+    public Double getValue(String i_Value)
+    {
+        return Double.valueOf(i_Value);
+    }
+    
+}
+
+
+
+
+
+/**
+ * 图数据库的String转Java的Boolean的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-07
+ */
+class MachiningStringToBoolean implements MachiningValue<Boolean ,String>
+{
+    
+    @Override
+    public Boolean getValue(String i_Value)
+    {
+        return Boolean.valueOf(i_Value);
+    }
+    
+}
+
+
+
+
+
+/**
+ * 图数据库的String转Java的Long的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-07
+ */
+class MachiningStringToLong implements MachiningValue<Long ,String>
+{
+    
+    @Override
+    public Long getValue(String i_Value)
+    {
+        return Long.valueOf(i_Value);
+    }
+    
+}
+
+
+
+
+
+/**
+ * 图数据库的String转Java的Short的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-07
+ */
+class MachiningStringToShort implements MachiningValue<Short ,String>
+{
+    
+    @Override
+    public Short getValue(String i_Value)
+    {
+        return Short.valueOf(i_Value);
+    }
+    
+}
+
+
+
+
+
+/**
+ * 图数据库的String转Java的Byte的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-07
+ */
+class MachiningStringToByte implements MachiningValue<Byte ,String>
+{
+    
+    @Override
+    public Byte getValue(String i_Value)
+    {
+        return Byte.valueOf(i_Value);
+    }
+    
+}
+
+
+
+
+
+/**
+ * 图数据库的String转Java的Byte[]的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-07
+ */
+class MachiningStringToByteArray implements MachiningValue<byte [] ,String>
+{
+    
+    @Override
+    public byte [] getValue(String i_Value)
+    {
+        return i_Value.getBytes();
     }
     
 }
@@ -709,6 +1015,138 @@ class MachiningEnum implements MachiningValue<Enum<?> ,Object>
             
             return null;
         }
+    }
+    
+}
+
+
+
+
+
+/**
+ * 图数据库的Boolean转Java的Integer的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-07
+ */
+class MachiningBooleanToInteger implements MachiningValue<Integer ,Boolean>
+{
+    
+    @Override
+    public Integer getValue(Boolean i_Value)
+    {
+        return i_Value ? 1 : 0;
+    }
+    
+}
+
+
+
+
+
+/**
+ * 图数据库的Integer转Java的Boolean的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-07
+ */
+class MachiningIntegerToBoolean implements MachiningValue<Boolean ,Integer>
+{
+    
+    @Override
+    public Boolean getValue(Integer i_Value)
+    {
+        return i_Value != null && i_Value > 0;
+    }
+    
+}
+
+
+
+
+
+/**
+ * 图数据库的Integer转Java的BigDecimal的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-07
+ */
+class MachiningIntegerToBigDecimal implements MachiningValue<BigDecimal ,Integer>
+{
+    
+    @Override
+    public BigDecimal getValue(Integer i_Value)
+    {
+        return new BigDecimal(i_Value);
+    }
+    
+}
+
+
+
+
+
+/**
+ * 图数据库的Integer转Java的Double的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-07
+ */
+class MachiningIntegerToDouble implements MachiningValue<Double ,Integer>
+{
+    
+    @Override
+    public Double getValue(Integer i_Value)
+    {
+        return i_Value.doubleValue();
+    }
+    
+}
+
+
+
+
+
+/**
+ * 图数据库的Integer转Java的Long的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-07
+ */
+class MachiningIntegerToLong implements MachiningValue<Long ,Integer>
+{
+    
+    @Override
+    public Long getValue(Integer i_Value)
+    {
+        return i_Value.longValue();
+    }
+    
+}
+
+
+
+
+
+/**
+ * 图数据库的Integer转Java的Short的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-07
+ */
+class MachiningIntegerToShort implements MachiningValue<Short ,Integer>
+{
+    
+    @Override
+    public Short getValue(Integer i_Value)
+    {
+        return i_Value.shortValue();
     }
     
 }

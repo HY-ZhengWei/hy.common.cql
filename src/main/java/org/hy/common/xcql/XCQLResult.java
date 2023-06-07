@@ -20,6 +20,7 @@ import org.hy.common.xcql.event.DefaultXCQLResultFillEvent;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Value;
+import org.neo4j.driver.types.Type;
 
 
 
@@ -229,8 +230,8 @@ public final class XCQLResult
      */
     @SuppressWarnings("unchecked")
     public XCQLData getDatas(Result i_Result
-                             ,int    i_StartRow
-                             ,int    i_PagePerSize)
+                             ,int   i_StartRow
+                             ,int   i_PagePerSize)
     {
         if ( i_Result == null )
         {
@@ -344,10 +345,11 @@ public final class XCQLResult
                                     v_FieldName = v_FName;
                                     v_IsEmpty   = false;
                                     
-                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName);
+                                    Value      v_FieldValue  = v_RData.get(v_FieldName);
+                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName ,v_FieldValue.type());
                                     if ( v_CFillMethod != null )
                                     {
-                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_RData ,v_FieldName ,null);
+                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_FieldValue);
                                         v_ColValue = v_CFillMethod.getMachiningValue().getValue(v_ColValue);
                                         v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                     }
@@ -365,10 +367,11 @@ public final class XCQLResult
                                         v_FieldName = v_FieldNameArr[1];
                                     }
                                     
-                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName);
+                                    Value      v_FieldValue  = v_RData;
+                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName ,v_FieldValue.type());
                                     if ( v_CFillMethod != null )
                                     {
-                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_RData ,v_FieldName ,null);
+                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_FieldValue);
                                         v_ColValue = v_CFillMethod.getMachiningValue().getValue(v_ColValue);
                                         v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                     }
@@ -470,10 +473,11 @@ public final class XCQLResult
                                     v_FieldName = v_FName;
                                     v_IsEmpty   = false;
                                     
-                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName);
+                                    Value      v_FieldValue  = v_RData.get(v_FieldName);
+                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName ,v_FieldValue.type());
                                     if ( v_CFillMethod != null )
                                     {
-                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_RData ,v_FieldName ,null);
+                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_FieldValue);
                                         v_ColValue = v_CFillMethod.getMachiningValue().getValue(v_ColValue);
                                         v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                     }
@@ -491,10 +495,11 @@ public final class XCQLResult
                                         v_FieldName = v_FieldNameArr[1];
                                     }
                                     
-                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName);
+                                    Value      v_FieldValue  = v_RData;
+                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName ,v_FieldValue.type());
                                     if ( v_CFillMethod != null )
                                     {
-                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_RData ,v_FieldName ,null);
+                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_FieldValue);
                                         v_ColValue = v_CFillMethod.getMachiningValue().getValue(v_ColValue);
                                         v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                     }
@@ -595,10 +600,11 @@ public final class XCQLResult
                                     v_FieldName = v_FName;
                                     v_IsEmpty   = false;
                                     
-                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName);
+                                    Value      v_FieldValue  = v_RData.get(v_FieldName);
+                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName ,v_FieldValue.type());
                                     if ( v_CFillMethod != null )
                                     {
-                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_RData ,v_FieldName ,null);
+                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_FieldValue);
                                         v_ColValue = v_CFillMethod.getMachiningValue().getValue(v_ColValue);
                                         v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                     }
@@ -616,10 +622,11 @@ public final class XCQLResult
                                         v_FieldName = v_FieldNameArr[1];
                                     }
                                     
-                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName);
+                                    Value      v_FieldValue  = v_RData;
+                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName ,v_FieldValue.type());
                                     if ( v_CFillMethod != null )
                                     {
-                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_RData ,v_FieldName ,null);
+                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_FieldValue);
                                         v_ColValue = v_CFillMethod.getMachiningValue().getValue(v_ColValue);
                                         v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                     }
@@ -719,10 +726,11 @@ public final class XCQLResult
                                     v_FieldName = v_FName;
                                     v_IsEmpty   = false;
                                     
-                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName);
+                                    Value      v_FieldValue  = v_RData.get(v_FieldName);
+                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName ,v_FieldValue.type());
                                     if ( v_CFillMethod != null )
                                     {
-                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_RData ,v_FieldName ,null);
+                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_FieldValue);
                                         v_ColValue = v_CFillMethod.getMachiningValue().getValue(v_ColValue);
                                         v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                     }
@@ -740,10 +748,11 @@ public final class XCQLResult
                                         v_FieldName = v_FieldNameArr[1];
                                     }
                                     
-                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName);
+                                    Value      v_FieldValue  = v_RData;
+                                    XCQLMethod v_CFillMethod = this.parseCFill(v_FieldName ,v_FieldValue.type());
                                     if ( v_CFillMethod != null )
                                     {
-                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_RData ,v_FieldName ,null);
+                                        Object v_ColValue = v_CFillMethod.getResultSet_Getter().invoke(v_FieldValue);
                                         v_ColValue = v_CFillMethod.getMachiningValue().getValue(v_ColValue);
                                         v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                     }
@@ -969,8 +978,9 @@ public final class XCQLResult
      * @version     v1.0
      *
      * @param i_Neo4jFieldName   Neo4j的属性名称，如 MATCH (n) RETURN n.id 时，为 id ，即不带neo4j的别名"n."，并且区别大小写
+     * @param i_Neo4jFieldType   Neo4j的属性类型。这里假设：同一属性的类型是一致的哈
      */
-    private XCQLMethod parseCFill(String i_Neo4jFieldName)
+    private XCQLMethod parseCFill(String i_Neo4jFieldName ,Type i_Neo4jFieldType)
     {
         if ( this.cfillMethodType != $CFILL_METHOD_VARY )
         {
@@ -1049,7 +1059,7 @@ public final class XCQLResult
                 v_XCQLMethod.setCollectionElement(  v_CollectionElement);
                 
                 // 按 call 方法的入参类型，决定 org.neo4j.driver.Result 获取字段值的方法
-                v_XCQLMethod.parseResultSet_Getter();
+                v_XCQLMethod.parseResultSet_Getter(i_Neo4jFieldType);
             }
             this.dbMetaData.addColumnInfo(i_Neo4jFieldName);
             this.cfillMethodArr.put(i_Neo4jFieldName ,v_XCQLMethod);
@@ -1103,6 +1113,8 @@ public final class XCQLResult
             Class<?> [] v_ParamClassArr_int     = new Class[v_ParamArr.length];
             Class<?> [] v_ParamClassArr_Integer = new Class[v_ParamArr.length];
             
+            XCQLMethod v_XCQLMethod = new XCQLMethod();
+            this.cfillMethodArr.put(this.cfill ,v_XCQLMethod);
             
             // 识别列级填充方法的所有入参
             for (int i=0; i<v_ParamArr.length; i++)
@@ -1129,9 +1141,7 @@ public final class XCQLResult
                     throw new RuntimeException("CFill method[" + this.cfill + "] Parameter is not valid. Parameter only 'colValue' or 'colNo' or 'colName'.");
                 }
                 
-                XCQLMethod v_XCQLMethod = new XCQLMethod();
                 v_XCQLMethod.addParam(v_MethodParam);
-                this.cfillMethodArr.put(this.cfill ,v_XCQLMethod);
             }
             
             
@@ -1292,7 +1302,7 @@ public final class XCQLResult
         
         try
         {
-            v_TableInstance = this.table.newInstance();
+            v_TableInstance = this.table.getDeclaredConstructor().newInstance();
         }
         catch (Exception exce)
         {
@@ -1317,7 +1327,7 @@ public final class XCQLResult
         
         try
         {
-            v_TableInstance = this.row.newInstance();
+            v_TableInstance = this.row.getDeclaredConstructor().newInstance();
         }
         catch (Exception exce)
         {

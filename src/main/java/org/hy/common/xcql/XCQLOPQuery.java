@@ -45,15 +45,15 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
 
         try
         {
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(v_DSG);
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSG);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(v_DSCQL);
+            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL);
         }
         catch (NullPointerException exce)
         {
@@ -98,14 +98,14 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
 
         try
         {
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(v_DSG);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(v_DSCQL);
             return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,i_Conn);
         }
         catch (NullPointerException exce)
@@ -154,16 +154,16 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
         
         try
         {
             i_XCQL.fireBeforeRule(i_Values);
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSG);
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSG);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
+            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL);
         }
         catch (NullPointerException exce)
         {
@@ -212,15 +212,15 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
         
         try
         {
             i_XCQL.fireBeforeRule(i_Values);
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSG);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
             return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,i_Conn);
         }
         catch (NullPointerException exce)
@@ -269,16 +269,16 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
 
         try
         {
             i_XCQL.fireBeforeRule(i_Obj);
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(i_Obj ,v_DSG);
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSG);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(i_Obj ,v_DSCQL);
+            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL);
         }
         catch (NullPointerException exce)
         {
@@ -327,15 +327,15 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
 
         try
         {
             i_XCQL.fireBeforeRule(i_Obj);
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(i_Obj ,v_DSG);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(i_Obj ,v_DSCQL);
             return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,i_Conn);
         }
         catch (NullPointerException exce)
@@ -542,15 +542,15 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
 
         try
         {
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(v_DSG);
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSG ,i_StartRow ,i_PagePerSize);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(v_DSCQL);
+            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL ,i_StartRow ,i_PagePerSize);
         }
         catch (NullPointerException exce)
         {
@@ -600,16 +600,16 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
 
         try
         {
             i_XCQL.fireBeforeRule(i_Values);
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSG);
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSG ,i_StartRow ,i_PagePerSize);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
+            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL ,i_StartRow ,i_PagePerSize);
         }
         catch (NullPointerException exce)
         {
@@ -659,16 +659,16 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
 
         try
         {
             i_XCQL.fireBeforeRule(i_Obj);
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(i_Obj ,v_DSG);
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSG ,i_StartRow ,i_PagePerSize);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(i_Obj ,v_DSCQL);
+            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL ,i_StartRow ,i_PagePerSize);
         }
         catch (NullPointerException exce)
         {
@@ -717,13 +717,13 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
         
         try
         {
-            v_DSG = i_XCQL.getDataSourceCQL();
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,i_CQL ,v_DSG ,i_StartRow ,i_PagePerSize);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,i_CQL ,v_DSCQL ,i_StartRow ,i_PagePerSize);
         }
         catch (NullPointerException exce)
         {
@@ -892,16 +892,16 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
 
         try
         {
             i_XCQL.fireBeforeRule(i_Values);
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSG);
-            return XCQLOPQuery.queryCQLCount_Inner(i_XCQL ,v_CQL ,v_DSG);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
+            return XCQLOPQuery.queryCQLCount_Inner(i_XCQL ,v_CQL ,v_DSCQL);
         }
         catch (NullPointerException exce)
         {
@@ -948,16 +948,16 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
 
         try
         {
             i_XCQL.fireBeforeRule(i_Obj);
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(i_Obj ,v_DSG);
-            return XCQLOPQuery.queryCQLCount_Inner(i_XCQL ,v_CQL ,v_DSG);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(i_Obj ,v_DSCQL);
+            return XCQLOPQuery.queryCQLCount_Inner(i_XCQL ,v_CQL ,v_DSCQL);
         }
         catch (NullPointerException exce)
         {
@@ -1000,15 +1000,15 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
 
         try
         {
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(v_DSG);
-            return XCQLOPQuery.queryCQLCount_Inner(i_XCQL ,v_CQL ,v_DSG);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(v_DSCQL);
+            return XCQLOPQuery.queryCQLCount_Inner(i_XCQL ,v_CQL ,v_DSCQL);
         }
         catch (NullPointerException exce)
         {
@@ -1052,15 +1052,15 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
 
         try
         {
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(v_DSG);
-            return XCQLOPQuery.queryCQLCount_Inner(i_XCQL ,v_CQL ,v_DSG);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(v_DSCQL);
+            return XCQLOPQuery.queryCQLCount_Inner(i_XCQL ,v_CQL ,v_DSCQL);
         }
         catch (NullPointerException exce)
         {
@@ -1178,16 +1178,16 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
 
         try
         {
             i_XCQL.fireBeforeRule(i_Values);
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSG);
-            return XCQLOPQuery.queryCQLValue_Inner(i_XCQL ,v_CQL ,v_DSG);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
+            return XCQLOPQuery.queryCQLValue_Inner(i_XCQL ,v_CQL ,v_DSCQL);
         }
         catch (NullPointerException exce)
         {
@@ -1237,16 +1237,16 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
 
         try
         {
             i_XCQL.fireBeforeRule(i_Obj);
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(i_Obj ,v_DSG);
-            return XCQLOPQuery.queryCQLValue_Inner(i_XCQL ,v_CQL ,v_DSG);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(i_Obj ,v_DSCQL);
+            return XCQLOPQuery.queryCQLValue_Inner(i_XCQL ,v_CQL ,v_DSCQL);
         }
         catch (NullPointerException exce)
         {
@@ -1291,15 +1291,15 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
 
         try
         {
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(v_DSG);
-            return XCQLOPQuery.queryCQLValue_Inner(i_XCQL ,v_CQL ,v_DSG);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(v_DSCQL);
+            return XCQLOPQuery.queryCQLValue_Inner(i_XCQL ,v_CQL ,v_DSCQL);
         }
         catch (NullPointerException exce)
         {
@@ -1345,15 +1345,15 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean         v_IsError = false;
-        DataSourceCQL v_DSG     = null;
-        String          v_CQL     = null;
+        boolean       v_IsError = false;
+        DataSourceCQL v_DSCQL   = null;
+        String        v_CQL     = null;
 
         try
         {
-            v_DSG = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(v_DSG);
-            return XCQLOPQuery.queryCQLValue_Inner(i_XCQL ,v_CQL ,v_DSG);
+            v_DSCQL = i_XCQL.getDataSourceCQL();
+            v_CQL = i_XCQL.getContent().getCQL(v_DSCQL);
+            return XCQLOPQuery.queryCQLValue_Inner(i_XCQL ,v_CQL ,v_DSCQL);
         }
         catch (NullPointerException exce)
         {

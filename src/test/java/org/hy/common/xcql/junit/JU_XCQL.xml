@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config>
+
+    <import name="cqls"            class="java.util.ArrayList" />
+    <import name="cql"             class="org.hy.common.xcql.XCQL" />
+    <import name="dataSourceCQL"   class="org.hy.common.xcql.DataSourceCQL" />
+
+
+
+    <cqls>
+    
+        <dataSourceCQL id="DSCQL_001">
+            <url>neo4j://127.0.0.1:7687</url>
+            <username>neo4j</username>
+            <password>ZhengWei@qq.com</password>
+            <database>cdc</database>
+        </dataSourceCQL>
+        
+        
+
+        <cql id="XCQL_Query_001_ReturnListMap"> 
+        
+            <dataSourceCQL ref="DSCQL_001" />
+        
+            <content>
+                <![CDATA[
+                MATCH (n) RETURN n
+                ]]>
+            </content>
+            
+            <result>
+                <row>java.util.HashMap</row>
+                <cfill>put(colName ,colValue)</cfill>
+            </result>
+        </cql>
+        
+        
+        
+        <cql id="XCQL_Query_002_ReturnObject"> 
+        
+            <dataSourceCQL ref="DSCQL_001" />
+        
+            <content>
+                <![CDATA[
+                MATCH (n:`数据源`) RETURN n
+                ]]>
+            </content>
+            
+            <result>
+                <row>org.hy.common.xcql.junit.DataSourceConfig</row>
+                <cfill>setter(colValue)</cfill>
+            </result>
+        </cql>
+        
+    </cqls>
+    
+</config>

@@ -1813,23 +1813,6 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
     {
         try
         {
-            if ( i_Resultset != null )
-            {
-                i_Resultset.remove();
-            }
-        }
-        catch (Throwable exce)
-        {
-            $Logger.error(exce);
-        }
-        finally
-        {
-            i_Resultset = null;
-        }
-        
-        
-        try
-        {
             if ( i_Conn != null )
             {
                 i_Conn.close();

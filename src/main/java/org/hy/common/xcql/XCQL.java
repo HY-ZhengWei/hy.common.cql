@@ -436,7 +436,7 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
      * 
      * 与游标分页查询相比，其性能是很高的。
      * 
-     * CQL语句中的占位符 :StartIndex 下标从0开始
+     * CQL语句中的占位符 #StartIndex 下标从0开始
      * 
      * @author      ZhengWei(HY)
      * @createDate  2016-02-22
@@ -459,7 +459,7 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
      * 
      * 与游标分页查询相比，其性能是很高的。
      * 
-     * CQL语句中的占位符 :StartIndex 下标从0开始
+     * CQL语句中的占位符 #StartIndex 下标从0开始
      * 
      * @author      ZhengWei(HY)
      * @createDate  2016-02-22
@@ -482,7 +482,7 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
      * 
      * 与游标分页查询相比，其性能是很高的。
      * 
-     * CQL语句中的占位符 :StartIndex 下标从0开始
+     * CQL语句中的占位符 #StartIndex 下标从0开始
      * 
      * @author      ZhengWei(HY)
      * @createDate  2016-02-22
@@ -508,7 +508,7 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
      * 
      * 与游标分页查询相比，其性能是很高的。
      * 
-     * CQL语句中的占位符 :StartIndex 下标从0开始
+     * CQL语句中的占位符 #StartIndex 下标从0开始
      * 
      * @author      ZhengWei(HY)
      * @createDate  2016-02-22
@@ -538,14 +538,14 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
         String v_PagingTemplate = null;
         if ( !Help.isNull(v_DBType) )
         {
-            v_PagingTemplate = ":CQLPaging SKIP :StartIndex LIMIT :PagePerCount";
+            v_PagingTemplate = DBCQL.$Placeholder + "CQLPaging SKIP " + DBCQL.$Placeholder + "StartIndex LIMIT " + DBCQL.$Placeholder + "PagePerCount";
         }
         else
         {
             return null;
         }
         
-        String v_PaginCQLText = StringHelp.replaceAll(v_PagingTemplate ,":CQLPaging" ,i_XCQL.getContent().getCqlText());
+        String v_PaginCQLText = StringHelp.replaceAll(v_PagingTemplate ,DBCQL.$Placeholder + "CQLPaging" ,i_XCQL.getContent().getCqlText());
         
         if ( i_IsClone )
         {

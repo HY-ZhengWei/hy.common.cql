@@ -53,6 +53,44 @@
             </result>
         </cql>
         
+        
+        
+        <cql id="XCQL_Query_003_Where"> 
+        
+            <dataSourceCQL ref="DSCQL_001" />
+        
+            <content>
+                <![CDATA[
+                MATCH (n:`数据源`) WHERE n.databaseName = '#databaseName' RETURN n
+                ]]>
+            </content>
+            
+            <result>
+                <row>org.hy.common.xcql.junit.DataSourceConfig</row>
+                <cfill>setter(colValue)</cfill>
+            </result>
+        </cql>
+        
+        
+        
+        <cql id="XCQL_Query_004_Paging"> 
+        
+            <dataSourceCQL ref="DSCQL_001" />
+        
+            <content>
+                <![CDATA[
+                MATCH (n:`数据源`) RETURN n ORDER BY n.databaseName
+                ]]>
+            </content>
+            
+            <result>
+                <row>org.hy.common.xcql.junit.DataSourceConfig</row>
+                <cfill>setter(colValue)</cfill>
+            </result>
+        </cql>
+        
+        
+        
     </cqls>
     
 </config>

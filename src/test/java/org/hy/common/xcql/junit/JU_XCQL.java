@@ -1,5 +1,6 @@
 package org.hy.common.xcql.junit;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +47,14 @@ public class JU_XCQL
     
     
     
+    /**
+     * 查询：返回List<Map>结构
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-07
+     * @version     v1.0
+     *
+     */
     @Test
     @SuppressWarnings("unchecked")
     public void test_Query_001_ReturnListMap()
@@ -62,6 +71,14 @@ public class JU_XCQL
     
     
     
+    /**
+     * 查询：返回List<Java Bean>结构
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-07
+     * @version     v1.0
+     *
+     */
     @SuppressWarnings("unchecked")
     @Test
     public void test_Query_002_ReturnObject()
@@ -69,6 +86,89 @@ public class JU_XCQL
         XCQL                   v_XCQL     = (XCQL) XJava.getObject("XCQL_Query_002_ReturnObject");
         XCQLData               v_XCQLData = v_XCQL.queryXCQLData();
         List<DataSourceConfig> v_Datas    = (List<DataSourceConfig>) v_XCQLData.getDatas();
+        
+        for (DataSourceConfig v_Item : v_Datas)
+        {
+            $Logger.info(v_Item.getDatabaseName());
+        }
+    }
+    
+    
+    
+    /**
+     * 查询：带占位符的查询条件是对象的
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-07
+     * @version     v1.0
+     *
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void test_Query_003_WhereObject()
+    {
+        DataSourceConfig v_Param = new DataSourceConfig();
+        v_Param.setDatabaseName("dataCenter");
+        
+        XCQL                   v_XCQL     = (XCQL) XJava.getObject("XCQL_Query_003_Where");
+        XCQLData               v_XCQLData = v_XCQL.queryXCQLData(v_Param);
+        List<DataSourceConfig> v_Datas    = (List<DataSourceConfig>) v_XCQLData.getDatas();
+        
+        for (DataSourceConfig v_Item : v_Datas)
+        {
+            $Logger.info(v_Item.getDatabaseName());
+        }
+    }
+    
+    
+    
+    /**
+     * 查询：带占位符的查询条件是Map的
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-07
+     * @version     v1.0
+     *
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void test_Query_004_WhereMap()
+    {
+        Map<String ,Object> v_Param = new HashMap<String ,Object>();
+        v_Param.put("databaseName" ,"dataCenter");
+        
+        XCQL                   v_XCQL     = (XCQL) XJava.getObject("XCQL_Query_003_Where");
+        XCQLData               v_XCQLData = v_XCQL.queryXCQLData(v_Param);
+        List<DataSourceConfig> v_Datas    = (List<DataSourceConfig>) v_XCQLData.getDatas();
+        
+        for (DataSourceConfig v_Item : v_Datas)
+        {
+            $Logger.info(v_Item.getDatabaseName());
+        }
+    }
+    
+    
+    
+    /**
+     * 查询：分页
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-07
+     * @version     v1.0
+     *
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void test_Query_004_Paging()
+    {
+        Map<String ,Object> v_Param = new HashMap<String ,Object>();
+        v_Param.put("startIndex"   ,0);    // 从第几行分页。有效下标从0开始
+        v_Param.put("pagePerCount" ,2);    // 每页显示数量
+        
+        XCQL                   v_XCQL       = (XCQL) XJava.getObject("XCQL_Query_004_Paging");
+        XCQL                   v_XCQLPaging = XCQL.queryPaging(v_XCQL ,true);
+        XCQLData               v_XCQLData   = v_XCQLPaging.queryXCQLData(v_Param);
+        List<DataSourceConfig> v_Datas      = (List<DataSourceConfig>) v_XCQLData.getDatas();
         
         for (DataSourceConfig v_Item : v_Datas)
         {

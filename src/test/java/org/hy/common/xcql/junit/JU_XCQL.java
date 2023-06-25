@@ -63,6 +63,7 @@ public class JU_XCQL
         DataSourceConfig v_Param = new DataSourceConfig();
         v_Param.setId("111");
         v_Param.setDatabaseName("dataCenter");
+        v_Param.setPort(3306);
         v_Param.setCreateTime(new Date());
         
         XCQL     v_XCQL     = (XCQL) XJava.getObject("XCQL_Insert_001");
@@ -87,6 +88,7 @@ public class JU_XCQL
         DataSourceConfig v_Param = new DataSourceConfig();
         v_Param.setId("222");
         v_Param.setDatabaseName("dataCenter222");
+        v_Param.setPort(3306);
         v_Param.setCreateTime(new Date());
         
         XCQL v_XCQL  = (XCQL) XJava.getObject("XCQL_Insert_001");
@@ -111,6 +113,7 @@ public class JU_XCQL
         Map<String ,Object> v_Param = new HashMap<String ,Object>();
         v_Param.put("id"           ,"333");
         v_Param.put("databaseName" ,"dataCenter");
+        v_Param.put("port"         ,3306);
         v_Param.put("createTime"   ,new Date());
         
         XCQL v_XCQL  = (XCQL) XJava.getObject("XCQL_Insert_001");
@@ -138,6 +141,7 @@ public class JU_XCQL
             DataSourceConfig v_Param = new DataSourceConfig();
             v_Param.setId("100" + x);
             v_Param.setDatabaseName("dataCenter_" + v_Param.getId());
+            v_Param.setPort(3306 + x);
             v_Param.setCreateTime(new Date());
             
             v_Params.add(v_Param);
@@ -168,6 +172,7 @@ public class JU_XCQL
             DataSourceConfig v_Param = new DataSourceConfig();
             v_Param.setId("200" + x);
             v_Param.setDatabaseName("dataCenter_" + v_Param.getId());
+            v_Param.setPort(3306 + x);
             v_Param.setCreateTime(new Date());
             
             v_Params.add(v_Param);
@@ -308,6 +313,74 @@ public class JU_XCQL
         {
             $Logger.info(v_Item.getDatabaseName());
         }
+    }
+    
+    
+    
+    /**
+     * 操作节点属性
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-07
+     * @version     v1.0
+     *
+     */
+    @Test
+    public void test_Set_001_Where()
+    {
+        DataSourceConfig v_Param = new DataSourceConfig();
+        v_Param.setDatabaseName("dataCenter");
+        v_Param.setPort(9999);
+        v_Param.setUserName("ZhengWei");
+        
+        XCQL     v_XCQL     = (XCQL) XJava.getObject("XCQL_Set_001_Where");
+        XCQLData v_XCQLData = v_XCQL.executeInsert(v_Param);
+        
+        $Logger.info(v_XCQLData.getRowCount() + " - " + v_XCQLData.getColCount());
+    }
+    
+    
+    
+    /**
+     * 删除操作节点属性
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-07
+     * @version     v1.0
+     *
+     */
+    @Test
+    public void test_Remove_001_Where()
+    {
+        DataSourceConfig v_Param = new DataSourceConfig();
+        v_Param.setDatabaseName("dataCenter");
+        
+        XCQL v_XCQL  = (XCQL) XJava.getObject("XCQL_Remove_001_Where");
+        int  v_Count = v_XCQL.executeUpdate(v_Param);
+        
+        $Logger.info(v_Count);
+    }
+    
+    
+    
+    /**
+     * 删除节点属性
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-24
+     * @version     v1.0
+     *
+     */
+    @Test
+    public void test_Delete_001_Where()
+    {
+        DataSourceConfig v_Param = new DataSourceConfig();
+        v_Param.setDatabaseName("dataCenter_3");
+        
+        XCQL v_XCQL  = (XCQL) XJava.getObject("XCQL_Delete_001_Where");
+        int  v_Count = v_XCQL.executeUpdate(v_Param);
+        
+        $Logger.info(v_Count);
     }
     
 }

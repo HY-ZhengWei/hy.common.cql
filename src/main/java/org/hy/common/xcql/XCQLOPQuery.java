@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import org.hy.common.Date;
 import org.hy.common.Help;
+import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
 
 
@@ -1094,7 +1095,7 @@ public class XCQLOPQuery
     /**
      * 查询记录总数
      * 
-     * 模块CQL的形式如：SELECT COUNT(1) FROM ...
+     * 模块CQL的形式如：MATCH (n) RETURN COUNT(n)
      *
      * @param i_XCQL  查询对象
      * @param i_CQL   查询CQL
@@ -1137,7 +1138,20 @@ public class XCQLOPQuery
             
             if ( v_Resultset.hasNext() )
             {
-                v_CQLCount = v_Resultset.next().get(0).asLong();
+                Record v_Record = v_Resultset.next();
+                Object v_Value  = XCQLMethod.getValue(v_Record.get(0));
+                
+                if ( v_Value != null )
+                {
+                    if ( v_Value instanceof Long )
+                    {
+                        v_CQLCount = (Long) v_Value;
+                    }
+                    else if ( v_Value instanceof Integer )
+                    {
+                        v_CQLCount = ((Integer) v_Value).longValue();
+                    }
+                }
             }
             
             Date v_EndTime = Date.getNowTime();
@@ -1422,7 +1436,8 @@ public class XCQLOPQuery
             
             if ( v_Resultset.hasNext() )
             {
-                v_CQLValue = v_Resultset.next().get(0);
+                Record v_Record = v_Resultset.next();
+                v_CQLValue = XCQLMethod.getValue(v_Record.get(0));
             }
             
             Date v_EndTime = Date.getNowTime();

@@ -54,7 +54,7 @@
         <dependency>
             <groupId>cn.openapis</groupId>
             <artifactId>hy.common.base</artifactId>
-            <version>1.0.170</version>
+            <version>1.0.171</version>
             <scope>provided</scope>
         </dependency>
         

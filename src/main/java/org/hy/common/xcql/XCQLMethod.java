@@ -284,6 +284,46 @@ public final class XCQLMethod
     
     
     /**
+     * 按图数据库的值类型，返回不同的Java类型的值。
+     * 
+     * 一般用于固定方法的填充
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-06-25
+     * @version     v1.0
+     *
+     * @param i_Value
+     * @return
+     */
+    public static Object getValue(Value i_Value)
+    {
+        Type v_ValueType = i_Value.type();
+        
+        if ( InternalTypeSystem.TYPE_SYSTEM.STRING().equals(v_ValueType) )
+        {
+            return i_Value.asString();
+        }
+        else if ( InternalTypeSystem.TYPE_SYSTEM.INTEGER().equals(v_ValueType) )
+        {
+            return i_Value.asInt();
+        }
+        else if ( InternalTypeSystem.TYPE_SYSTEM.FLOAT().equals(v_ValueType) )
+        {
+            return i_Value.asFloat();
+        }
+        else if ( InternalTypeSystem.TYPE_SYSTEM.BOOLEAN().equals(v_ValueType) )
+        {
+            return i_Value.asBoolean();
+        }
+        else
+        {
+            return i_Value.toString();
+        }
+    }
+    
+    
+    
+    /**
      * 按 call 方法的入参类型，决定 org.neo4j.driver.Result 获取字段值的方法
      * 
      * 当 XCQLResult.cfill 等于 "setter(colValue)" 时（即，XCQLResult.$CFILL_METHOD_VARY），此值才会有效。
@@ -371,31 +411,10 @@ public final class XCQLMethod
                     this.machiningValue = MachiningDefault.$MachiningDefault;
                 }
             }
-            else if ( InternalTypeSystem.TYPE_SYSTEM.BOOLEAN().equals(i_Neo4jFieldType) )
-            {
-                this.resultSet_Getter = Value.class.getDeclaredMethod("asBoolean");
-                
-                if ( v_SetterParamClass == boolean.class
-                  || v_SetterParamClass == Boolean.class )
-                {
-                    this.machiningValue = MachiningDefault.$MachiningDefault;
-                }
-                else if ( v_SetterParamClass == int.class
-                       || v_SetterParamClass == Integer.class )
-                {
-                    this.machiningValue = MachiningDefault.$MachiningBooleanToInteger;
-                }
-                else if ( v_SetterParamClass == String.class )
-                {
-                    this.machiningValue = MachiningDefault.$MachiningToString;
-                }
-                else
-                {
-                    this.machiningValue = MachiningDefault.$MachiningDefault;
-                }
-            }
             else if ( InternalTypeSystem.TYPE_SYSTEM.INTEGER().equals(i_Neo4jFieldType) )
             {
+                this.resultSet_Getter = Value.class.getDeclaredMethod("asInt");
+                
                 if ( v_SetterParamClass == int.class
                   || v_SetterParamClass == Integer.class )
                 {
@@ -438,10 +457,51 @@ public final class XCQLMethod
             {
                 this.resultSet_Getter = Value.class.getDeclaredMethod("asDouble");
                 this.machiningValue   = MachiningDefault.$MachiningDefault;
+                
+                if ( v_SetterParamClass == double.class
+                  || v_SetterParamClass == Double.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningDefault;
+                }
+                else if ( v_SetterParamClass == BigDecimal.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningDoubleToBigDecimal;
+                }
+                else if ( v_SetterParamClass == String.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningToString;
+                }
+                else
+                {
+                    this.machiningValue = MachiningDefault.$MachiningDefault;
+                }
+            }
+            else if ( InternalTypeSystem.TYPE_SYSTEM.BOOLEAN().equals(i_Neo4jFieldType) )
+            {
+                this.resultSet_Getter = Value.class.getDeclaredMethod("asBoolean");
+                
+                if ( v_SetterParamClass == boolean.class
+                  || v_SetterParamClass == Boolean.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningDefault;
+                }
+                else if ( v_SetterParamClass == int.class
+                       || v_SetterParamClass == Integer.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningBooleanToInteger;
+                }
+                else if ( v_SetterParamClass == String.class )
+                {
+                    this.machiningValue = MachiningDefault.$MachiningToString;
+                }
+                else
+                {
+                    this.machiningValue = MachiningDefault.$MachiningDefault;
+                }
             }
             else
             {
-                this.resultSet_Getter = Value.class.getDeclaredMethod("asString");
+                this.resultSet_Getter = Value.class.getDeclaredMethod("toString");
                 this.machiningValue   = MachiningDefault.$MachiningDefault;
             }
         }
@@ -677,6 +737,7 @@ class MachiningDefault implements MachiningValue<Object ,Object>
     public static final MachiningIntegerToDouble     $MachiningIntegerToDouble     = new MachiningIntegerToDouble();
     public static final MachiningIntegerToLong       $MachiningIntegerToLong       = new MachiningIntegerToLong();
     public static final MachiningIntegerToShort      $MachiningIntegerToShort      = new MachiningIntegerToShort();
+    public static final MachiningDoubleToBigDecimal  $MachiningDoubleToBigDecimal  = new MachiningDoubleToBigDecimal();
     
     
 
@@ -1147,6 +1208,28 @@ class MachiningIntegerToShort implements MachiningValue<Short ,Integer>
     public Short getValue(Integer i_Value)
     {
         return i_Value.shortValue();
+    }
+    
+}
+
+
+
+
+
+/**
+ * 图数据库的Double转Java的BigDecimal的加工类
+ * 
+ * @author      ZhengWei(HY)
+ * @version     v1.0
+ * @createDate  2023-06-25
+ */
+class MachiningDoubleToBigDecimal implements MachiningValue<BigDecimal ,Double>
+{
+    
+    @Override
+    public BigDecimal getValue(Double i_Value)
+    {
+        return new BigDecimal(i_Value);
     }
     
 }

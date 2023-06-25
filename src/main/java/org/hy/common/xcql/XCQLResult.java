@@ -295,7 +295,7 @@ public final class XCQLResult
                                     v_FieldName = v_FName;
                                     v_IsEmpty   = false;
                                     
-                                    Object v_ColValue = v_RData.get(v_FieldName ,"");
+                                    Object v_ColValue = XCQLMethod.getValue(v_RData.get(v_FieldName));
                                     v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                 }
                                 
@@ -311,7 +311,7 @@ public final class XCQLResult
                                         v_FieldName = v_FieldNameArr[1];
                                     }
                                     
-                                    Object v_ColValue = v_RData.asString();
+                                    Object v_ColValue = XCQLMethod.getValue(v_RData);
                                     v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                 }
                             }
@@ -417,7 +417,7 @@ public final class XCQLResult
                                     v_FieldName = v_FName;
                                     v_IsEmpty   = false;
                                     
-                                    Object v_ColValue = v_RData.get(v_FieldName ,"");
+                                    Object v_ColValue = XCQLMethod.getValue(v_RData.get(v_FieldName));
                                     v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                 }
                                 
@@ -433,7 +433,7 @@ public final class XCQLResult
                                         v_FieldName = v_FieldNameArr[1];
                                     }
                                     
-                                    Object v_ColValue = v_RData.asString();
+                                    Object v_ColValue = XCQLMethod.getValue(v_RData);
                                     v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                 }
                             }
@@ -551,7 +551,7 @@ public final class XCQLResult
                                     v_FieldName = v_FName;
                                     v_IsEmpty   = false;
                                     
-                                    Object v_ColValue = v_RData.get(v_FieldName ,"");
+                                    Object v_ColValue = XCQLMethod.getValue(v_RData.get(v_FieldName));
                                     v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                 }
                                 
@@ -567,7 +567,7 @@ public final class XCQLResult
                                         v_FieldName = v_FieldNameArr[1];
                                     }
                                     
-                                    Object v_ColValue = v_RData.asString();
+                                    Object v_ColValue = XCQLMethod.getValue(v_RData);
                                     v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                 }
                             }
@@ -671,7 +671,7 @@ public final class XCQLResult
                                     v_FieldName = v_FName;
                                     v_IsEmpty   = false;
                                     
-                                    Object v_ColValue = v_RData.get(v_FieldName ,"");
+                                    Object v_ColValue = XCQLMethod.getValue(v_RData.get(v_FieldName));
                                     v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                 }
                                 
@@ -687,7 +687,7 @@ public final class XCQLResult
                                         v_FieldName = v_FieldNameArr[1];
                                     }
                                     
-                                    Object v_ColValue = v_RData.asString();
+                                    Object v_ColValue = XCQLMethod.getValue(v_RData);
                                     v_CFillMethod.invoke(v_Row ,v_ColValue ,(Long)null ,v_FieldName);
                                 }
                             }

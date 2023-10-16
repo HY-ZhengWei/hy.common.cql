@@ -83,7 +83,7 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
     protected static final int                                 $BufferSize     = 4 * 1024;
     
     /** 对象池，在无XJava的环境中使用的兼容模式 */
-    private static final Map<String ,Object>                     $CQLPool        = new HashMap<String ,Object>();
+    private static final Map<String ,Object>                   $CQLPool        = new HashMap<String ,Object>();
     
     
     

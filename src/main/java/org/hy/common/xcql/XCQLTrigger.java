@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.hy.common.Execute;
 import org.hy.common.Help;
+import org.hy.common.XJavaID;
 
 
 
@@ -31,7 +32,7 @@ import org.hy.common.Help;
  * @createDate  2023-06-03
  * @version     v1.0
  */
-public class XCQLTrigger
+public class XCQLTrigger implements Comparable<XCQLTrigger> ,XJavaID
 {
     /** 执行方式之一：XCQL.execute(...) */
     public static final           int $Execute       = 0;
@@ -64,6 +65,12 @@ public class XCQLTrigger
     
     /** 是否初始化 createBackup() 添加的XCQL。只针对 createBackup() 功能的初始化 */
     private boolean               isInit;
+    
+    /** XJava池中对象的ID标识 */
+    private String                xjavaID;
+    
+    /** 注释。可用于日志的输出等帮助性的信息 */
+    private String                comment;
     
     
     
@@ -501,4 +508,114 @@ public class XCQLTrigger
         this.isInit = isInit;
     }
     
+    
+    
+    /**
+     * 获取：XJava池中对象的ID标识
+     */
+    @Override
+    public String getXJavaID()
+    {
+        return xjavaID;
+    }
+
+
+    
+    /**
+     * 设置：XJava池中对象的ID标识
+     * 
+     * @param i_XjavaID XJava池中对象的ID标识
+     */
+    @Override
+    public void setXJavaID(String i_XjavaID)
+    {
+        this.xjavaID = i_XjavaID;
+    }
+
+
+    
+    /**
+     * 获取：注释。可用于日志的输出等帮助性的信息
+     */
+    @Override
+    public String getComment()
+    {
+        return comment;
+    }
+
+
+    
+    /**
+     * 设置：注释。可用于日志的输出等帮助性的信息
+     * 
+     * @param i_Comment 注释。可用于日志的输出等帮助性的信息
+     */
+    @Override
+    public void setComment(String i_Comment)
+    {
+        this.comment = i_Comment;
+    }
+    
+    
+    
+    @Override
+    public int compareTo(XCQLTrigger i_XCQLTrigger)
+    {
+        if ( i_XCQLTrigger == null )
+        {
+            return 1;
+        }
+        else if ( this == i_XCQLTrigger )
+        {
+            return 0;
+        }
+        else if ( Help.isNull(this.getXJavaID()) )
+        {
+            return -1;
+        }
+        else if ( Help.isNull(i_XCQLTrigger.getXJavaID()) )
+        {
+            return 1;
+        }
+        else
+        {
+            return this.getXJavaID().compareTo(i_XCQLTrigger.getXJavaID());
+        }
+    }
+    
+    
+    
+    @Override
+    public boolean equals(Object i_Other)
+    {
+        if ( i_Other == null )
+        {
+            return false;
+        }
+        else if ( this == i_Other )
+        {
+            return true;
+        }
+        else if ( i_Other instanceof XCQLTrigger )
+        {
+            XCQLTrigger v_Other = (XCQLTrigger) i_Other;
+            
+            if ( Help.isNull(this.getXJavaID()) )
+            {
+                return false;
+            }
+            else if ( Help.isNull(v_Other.getXJavaID()) )
+            {
+                return false;
+            }
+            else
+            {
+                return this.getXJavaID().equals(v_Other.getXJavaID());
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
 }

@@ -46,44 +46,73 @@ import org.neo4j.driver.Result;
  * @author      ZhengWei(HY)
  * @createDate  2023-06-02
  * @version     v1.0
+ *              v2.0 2023-10-18  添加：是否附加触发额外参数 triggerParams
  */
 public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaID
 {
-    private static final Logger                                $Logger         = new Logger(XCQL.class ,true);
+    private static final Logger                                $Logger              = new Logger(XCQL.class ,true);
     
     /** CQL类型。N: 增、删、改、查的普通CQL语句  (默认值) */
-    public  static final String                                $Type_NormalCQL = "N";
+    public  static final String                                $Type_NormalCQL      = "N";
     
     /** CQL类型。C：DDL、DCL、TCL创建表，创建对象等 */
-    public  static final String                                $Type_Create    = "C";
+    public  static final String                                $Type_Create         = "C";
     
     /** execute()方法中执行多条CQL语句的分割符 */
-    public  static final String                                $Executes_Split = ";/";
+    public  static final String                                $Executes_Split      = ";/";
     
     /** 每个XCQL对象的执行日志。默认每个XCQL对象只保留100条日志。按 getObjectID() 分区 */
-    public  static final TablePartitionBusway<String ,XCQLLog> $CQLBuswayTP    = new TablePartitionBusway<String ,XCQLLog>();
+    public  static final TablePartitionBusway<String ,XCQLLog> $CQLBuswayTP         = new TablePartitionBusway<String ,XCQLLog>();
     
     /** 所有CQL执行日志，有一定的执行顺序。默认只保留5000条执行过的CQL语句 */
-    public  static final Busway<XCQLLog>                       $CQLBusway      = new Busway<XCQLLog>(5000);
+    public  static final Busway<XCQLLog>                       $CQLBusway           = new Busway<XCQLLog>(5000);
     
     /** CQL执行异常的日志。默认只保留9000条执行异常的CQL语句 */
-    public  static final Busway<XCQLLog>                       $CQLBuswayError = new Busway<XCQLLog>(9000);
+    public  static final Busway<XCQLLog>                       $CQLBuswayError      = new Busway<XCQLLog>(9000);
     
     /** XCQL */
-    public  static final String                                $XCQLErrors     = "XCQL-Errors";
+    public  static final String                                $XCQLErrors          = "XCQL-Errors";
+    
+    
+    
+    /** 触发器的额外附加参数名称：触发源的ID，即XSQL.getObjectID() */
+    public  static final String                                $Trigger_SourceID    = "XT_SourceID";
+    
+    /** 触发器的额外附加参数名称：触发源的XJavaID */
+    public  static final String                                $Trigger_SourceXID   = "XT_SourceXID";
+    
+    /** 触发器的额外附加参数名称：触发源的执行开始时间 */
+    public  static final String                                $Trigger_StartTime   = "XT_StartTime";
+    
+    /** 触发器的额外附加参数名称：触发源的执行结束时间 */
+    public  static final String                                $Trigger_EndTime     = "XT_EndTime";
+    
+    /** 触发器的额外附加参数名称：触发源的执行是否异常 */
+    public  static final String                                $Trigger_IsError     = "XT_IsError";
+    
+    /** 触发器的额外附加参数名称：触发源的异常信息 */
+    public  static final String                                $Trigger_ErrorInfo   = "XT_ErrorInfo";
+    
+    /** 触发器的额外附加参数名称：触发源的执行方式 */
+    public  static final String                                $Trigger_ExecuteType = "XT_ExecuteType";
+    
+    /** 触发器的额外附加参数名称：触发源的读写行数 */
+    public  static final String                                $Trigger_IORowCount  = "XT_IORowCount";
+    
+    
     
     /**
      * 通用分区XCQL标示记录（确保只操作一次，而不是重复执行替换操作）
      * Map.key   为数据库类型 + "_" + XCQL.getObjectID()
      * Map.value 为 XCQL
      */
-    private static final Map<String ,XCQL>                     $PagingMap      = new HashMap<String ,XCQL>();
+    private static final Map<String ,XCQL>                     $PagingMap           = new HashMap<String ,XCQL>();
                                                                
     /** 缓存大小 */
-    protected static final int                                 $BufferSize     = 4 * 1024;
+    protected static final int                                 $BufferSize          = 4 * 1024;
     
     /** 对象池，在无XJava的环境中使用的兼容模式 */
-    private static final Map<String ,Object>                   $CQLPool        = new HashMap<String ,Object>();
+    private static final Map<String ,Object>                   $CQLPool             = new HashMap<String ,Object>();
     
     
     
@@ -126,6 +155,25 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
     
     /** XCQL的触发器 */
     private XCQLTrigger                    trigger;
+    
+    /**
+     * XCQL的触发器，在触发执行时，是否携带公共参数。
+     * 当携带公共参数时，触发器的执行参数将被统一包装为Map类型，除了触发源原本的入参外，还将添加如下额外的参数
+     *     1. XT_SourceID:    String类型，触发源的ID，即XCQL.getObjectID()
+     *     2. XT_SourceXID:   String类型，触发源的XJavaID
+     *     3. XT_StartTime:   Date类型，  触发源的执行开始时间
+     *     4. XT_EndTime：    Date类型，  触发源的执行完成时间
+     *     5. XT_IsError：    Integer类型，触发源的是否异常，0成功，1异常
+     *     6. XT_ErrorInfo:   String类型，触发源的异常信息
+     *     7. XT_ExecuteType: String类型，触发源的执行方式
+     *     8. XT_IORowCount:  Integer类型，触发源的读写行数
+     * 
+     * 默认为：false
+     * 
+     * 注：triggerParams=true时，并且触发源的入参是List等复杂结构时，不再向触发器传递，仅传递上面和额外公共参数。
+     *    同时，触发器的执行方法也有所改变，如executeUpdatesPrepared改成executes。，
+     */
+    private boolean                        triggerParams;
     
     /**
      * CQL类型。
@@ -191,6 +239,7 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
         this.content            = new DBCQL();
         this.result             = new XCQLResult();
         this.trigger            = null;
+        this.triggerParams      = false;
         this.type               = $Type_NormalCQL;
         this.allowExecutesSplit = false;
         this.uuid               = StringHelp.getUUID();
@@ -2242,6 +2291,159 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
     
     
     /**
+     * 获取：XCQL的触发器，在触发执行时，是否携带公共参数。
+     * 当携带公共参数时，触发器的执行参数将被统一包装为Map类型，除了触发源原本的入参外，还将添加如下额外的参数
+     *     1. XT_SourceID:    String类型，触发源的ID，即XCQL.getObjectID()
+     *     2. XT_SourceXID:   String类型，触发源的XJavaID
+     *     3. XT_StartTime:   Date类型，  触发源的执行开始时间
+     *     4. XT_EndTime：    Date类型，  触发源的执行完成时间
+     *     5. XT_IsError：    Integer类型，触发源的是否异常，0成功，1异常
+     *     6. XT_ErrorInfo:   String类型，触发源的异常信息
+     *     7. XT_ExecuteType: String类型，触发源的执行方式
+     *     8. XT_IORowCount:  Integer类型，触发源的读写行数
+     * 
+     * 默认为：false，
+     */
+    public boolean isTriggerParams()
+    {
+        return triggerParams;
+    }
+
+
+    
+    /**
+     * 设置：XCQL的触发器，在触发执行时，是否携带公共参数。
+     * 当携带公共参数时，触发器的执行参数将被统一包装为Map类型，除了触发源原本的入参外，还将添加如下额外的参数
+     *     1. XT_SourceID:    String类型，触发源的ID，即XCQL.getObjectID()
+     *     2. XT_SourceXID:   String类型，触发源的XJavaID
+     *     3. XT_StartTime:   Date类型，  触发源的执行开始时间
+     *     4. XT_EndTime：    Date类型，  触发源的执行完成时间
+     *     5. XT_IsError：    Integer类型，触发源的是否异常，0成功，1异常
+     *     6. XT_ErrorInfo:   String类型，触发源的异常信息
+     *     7. XT_ExecuteType: String类型，触发源的执行方式
+     *     8. XT_IORowCount:  Integer类型，触发源的读写行数
+     * 
+     * 默认为：false
+     * 
+     * @param i_TriggerParams
+     */
+    public void setTriggerParams(boolean i_TriggerParams)
+    {
+        this.triggerParams = i_TriggerParams;
+    }
+    
+    
+    
+    /**
+     * 触发源执行前，生成触发器额外附加参数
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-10-17
+     * @version     v1.0
+     *
+     * @param i_ExecuteType  触发源的执行方式
+     * @return
+     */
+    protected Map<String ,Object> executeBeforeForTrigger(String i_ExecuteType ,Object i_XSQLParam)
+    {
+        Map<String ,Object> v_Params = null;
+        
+        if ( this.triggerParams )
+        {
+            if ( i_XSQLParam != null )
+            {
+                try
+                {
+                    v_Params = Help.toMap(i_XSQLParam ,null ,true ,false ,true);
+                }
+                catch (Exception e)
+                {
+                    // 异常时，也继续
+                    $Logger.error(e);
+                    v_Params = new HashMap<String ,Object>();
+                }
+            }
+            else
+            {
+                v_Params = new HashMap<String ,Object>();
+            }
+            
+            v_Params.put($Trigger_SourceID    ,this.getObjectID());
+            v_Params.put($Trigger_SourceXID   ,this.getObjectID());
+            v_Params.put($Trigger_StartTime   ,new Date());
+            v_Params.put($Trigger_ExecuteType ,i_ExecuteType);
+        }
+        
+        return v_Params;
+    }
+    
+    
+    
+    /**
+     * 触发源执行前，生成触发器额外附加参数
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-10-17
+     * @version     v1.0
+     *
+     * @param i_ExecuteType  触发源的执行方式
+     * @param i_XSQLParam    触发源的执行参数（禁止修改、添加、删除任务元素）
+     * @return
+     */
+    protected Map<String ,Object> executeBeforeForTrigger(String i_ExecuteType ,final Map<String ,?> i_XSQLParam)
+    {
+        Map<String ,Object> v_Params = null;
+        
+        if ( this.triggerParams )
+        {
+            v_Params = new HashMap<String ,Object>();
+            
+            if ( !Help.isNull(i_XSQLParam) )
+            {
+                for (Map.Entry<String, ?> v_Item : i_XSQLParam.entrySet())
+                {
+                    v_Params.put(v_Item.getKey() ,v_Item.getValue());
+                }
+            }
+            
+            v_Params.put($Trigger_SourceID    ,this.getObjectID());
+            v_Params.put($Trigger_SourceXID   ,this.getObjectID());
+            v_Params.put($Trigger_StartTime   ,new Date());
+            v_Params.put($Trigger_ExecuteType ,i_ExecuteType);
+        }
+        
+        return v_Params;
+    }
+    
+    
+    
+    /**
+     * 触发源执行后，生成触发器额外附加参数
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-10-17
+     * @version     v1.0
+     *
+     * @param io_TriggerParams  触发器额外附加参数
+     * @param i_IORowCount      读写行数
+     * @param i_ErrorInfo       异常信息。为空和空字符串均表示无异常
+     * @return
+     */
+    protected Map<String ,Object> executeAfterForTrigger(Map<String ,Object> io_TriggerParams ,long i_IORowCount ,String i_ErrorInfo)
+    {
+        Map<String ,Object> v_Params = io_TriggerParams;
+        
+        v_Params.put($Trigger_EndTime    ,new Date());
+        v_Params.put($Trigger_IORowCount ,i_IORowCount);
+        v_Params.put($Trigger_IsError    ,Help.isNull(i_ErrorInfo) ? 0 : 1);
+        v_Params.put($Trigger_ErrorInfo  ,Help.NVL(i_ErrorInfo));
+        
+        return v_Params;
+    }
+    
+    
+    
+    /**
      * CQL类型。
      * 
      * N: 增、删、改、查的普通CQL语句  (默认值)
@@ -2339,6 +2541,22 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
     public String getObjectID()
     {
         return this.uuid;
+    }
+    
+    
+    
+    /**
+     * 允许外界重新定义对象ID
+     * 
+     * @author      ZhengWei(HY)
+     * @createDate  2023-10-17
+     * @version     v1.0
+     *
+     * @param i_ID
+     */
+    public void setObjectID(String i_ID)
+    {
+        this.uuid = i_ID;
     }
     
     

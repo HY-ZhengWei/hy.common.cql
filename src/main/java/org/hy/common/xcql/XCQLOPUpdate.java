@@ -26,6 +26,7 @@ import org.neo4j.driver.Transaction;
  * @author      ZhengWei(HY)
  * @createDate  2023-06-05
  * @version     v1.0
+ *              v2.0  2023-10-18  添加：是否附加触发额外参数的功能
  */
 public class XCQLOPUpdate
 {
@@ -39,20 +40,25 @@ public class XCQLOPUpdate
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("executeUpdate" ,(Object) null);
+        int                 v_IORowCount    = 0;
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
             v_DSCQL = i_XCQL.getDataSourceCQL();
             v_CQL   = i_XCQL.getContent().getCQL(v_DSCQL);
-            return XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,v_CQL ,v_DSCQL);
+            v_IORowCount = XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,v_CQL ,v_DSCQL);
+            return v_IORowCount;
         }
         /* try{}已有中捕获所有异常，并仅出外抛出Null和Runtime两种异常。为保持异常类型不变，写了两遍一样的 */
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -61,7 +67,8 @@ public class XCQLOPUpdate
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -72,7 +79,14 @@ public class XCQLOPUpdate
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes();
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes();
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -91,23 +105,26 @@ public class XCQLOPUpdate
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("executeUpdate" ,i_Values);
+        int                 v_IORowCount    = 0;
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
             i_XCQL.fireBeforeRule(i_Values);
             v_DSCQL   = i_XCQL.getDataSourceCQL();
             v_CQL     = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
-            int v_Ret = XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,v_CQL ,v_DSCQL);
-            
-            return v_Ret;
+            v_IORowCount = XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,v_CQL ,v_DSCQL);
+            return v_IORowCount;
         }
         /* try{}已有中捕获所有异常，并仅出外抛出Null和Runtime两种异常。为保持异常类型不变，写了两遍一样的 */
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesMap(i_Values));
@@ -116,7 +133,8 @@ public class XCQLOPUpdate
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesMap(i_Values));
@@ -127,7 +145,14 @@ public class XCQLOPUpdate
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes(i_Values);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes(i_Values);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -137,43 +162,48 @@ public class XCQLOPUpdate
     /**
      * 占位符CQL的Create\Set\Delete语句的执行。
      * 
-     * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
+     * 1. 按对象 i_Values 填充占位符CQL，生成可执行的CQL语句；
      * 
-     * @param i_Obj  占位符CQL的填充对象。
-     * @return       返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
+     * @param i_Values  占位符CQL的填充对象。
+     * @return          返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
-    public static int executeUpdate(final XCQL i_XCQL ,final Object i_Obj)
+    public static int executeUpdate(final XCQL i_XCQL ,final Object i_Values)
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL     = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("executeUpdate" ,i_Values);
+        int                 v_IORowCount    = 0;
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
-            i_XCQL.fireBeforeRule(i_Obj);
+            i_XCQL.fireBeforeRule(i_Values);
             v_DSCQL   = i_XCQL.getDataSourceCQL();
-            v_CQL     = i_XCQL.getContent().getCQL(i_Obj ,v_DSCQL);
-            int v_Ret = XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,v_CQL ,v_DSCQL);
-            return v_Ret;
+            v_CQL     = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
+            v_IORowCount = XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,v_CQL ,v_DSCQL);
+            return v_IORowCount;
         }
         /* try{}已有中捕获所有异常，并仅出外抛出Null和Runtime两种异常。为保持异常类型不变，写了两遍一样的 */
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
-                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Obj));
+                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Values));
             }
             throw exce;
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
-                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Obj));
+                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Values));
             }
             throw exce;
         }
@@ -181,7 +211,14 @@ public class XCQLOPUpdate
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes(i_Obj);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes(i_Values);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -196,16 +233,21 @@ public class XCQLOPUpdate
      */
     public static int executeUpdate(final XCQL i_XCQL ,final String i_CQL)
     {
-        boolean v_IsError = false;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("executeUpdate" ,(Object) null);
+        int                 v_IORowCount    = 0;
 
         try
         {
-            return XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,i_CQL ,i_XCQL.getDataSourceCQL());
+            v_IORowCount = XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,i_CQL ,i_XCQL.getDataSourceCQL());
+            return v_IORowCount;
         }
         /* try{}已有中捕获所有异常，并仅出外抛出Null和Runtime两种异常。为保持异常类型不变，写了两遍一样的 */
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(i_CQL ,exce ,i_XCQL));
@@ -214,7 +256,8 @@ public class XCQLOPUpdate
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(i_CQL ,exce ,i_XCQL));
@@ -225,7 +268,14 @@ public class XCQLOPUpdate
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes();
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes();
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -299,20 +349,25 @@ public class XCQLOPUpdate
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("executeUpdate" ,(Object) null);
+        int                 v_IORowCount    = 0;
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
             v_DSCQL = i_XCQL.getDataSourceCQL();
             v_CQL   = i_XCQL.getContent().getCQL(v_DSCQL);
-            return XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,v_CQL ,i_Conn);
+            v_IORowCount = XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,v_CQL ,i_Conn);
+            return v_IORowCount;
         }
         /* try{}已有中捕获所有异常，并仅出外抛出Null和Runtime两种异常。为保持异常类型不变，写了两遍一样的 */
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -321,7 +376,8 @@ public class XCQLOPUpdate
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -332,7 +388,14 @@ public class XCQLOPUpdate
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes();
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes();
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -352,21 +415,26 @@ public class XCQLOPUpdate
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("executeUpdate" ,i_Values);
+        int                 v_IORowCount    = 0;
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
             i_XCQL.fireBeforeRule(i_Values);
             v_DSCQL = i_XCQL.getDataSourceCQL();
             v_CQL   = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
-            return XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,v_CQL ,i_Conn);
+            v_IORowCount = XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,v_CQL ,i_Conn);
+            return v_IORowCount;
         }
         /* try{}已有中捕获所有异常，并仅出外抛出Null和Runtime两种异常。为保持异常类型不变，写了两遍一样的 */
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesMap(i_Values));
@@ -375,7 +443,8 @@ public class XCQLOPUpdate
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesMap(i_Values));
@@ -386,7 +455,14 @@ public class XCQLOPUpdate
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes(i_Values);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes(i_Values);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -398,41 +474,47 @@ public class XCQLOPUpdate
      * 
      * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
      * 
-     * @param i_Obj   占位符CQL的填充对象。
-     * @param i_Conn  数据库连接
-     * @return        返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
+     * @param i_Values   占位符CQL的填充对象。
+     * @param i_Conn     数据库连接
+     * @return           返回语句影响的数量（创建、删除节点和关系时，返回影响的节点数量；非节点和关系操作时，才取对属性的影响数量）
      */
-    public static int executeUpdate(final XCQL i_XCQL ,final Object i_Obj ,Connection i_Conn)
+    public static int executeUpdate(final XCQL i_XCQL ,final Object i_Values ,Connection i_Conn)
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL     = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("executeUpdate" ,i_Values);
+        int                 v_IORowCount    = 0;
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
-            i_XCQL.fireBeforeRule(i_Obj);
+            i_XCQL.fireBeforeRule(i_Values);
             v_DSCQL = i_XCQL.getDataSourceCQL();
-            v_CQL   = i_XCQL.getContent().getCQL(i_Obj ,v_DSCQL);
-            return XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,v_CQL ,i_Conn);
+            v_CQL   = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
+            v_IORowCount = XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,v_CQL ,i_Conn);
+            return v_IORowCount;
         }
         /* try{}已有中捕获所有异常，并仅出外抛出Null和Runtime两种异常。为保持异常类型不变，写了两遍一样的 */
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
-                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Obj));
+                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Values));
             }
             throw exce;
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
-                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Obj));
+                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Values));
             }
             throw exce;
         }
@@ -440,7 +522,14 @@ public class XCQLOPUpdate
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes(i_Obj);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes(i_Values);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -456,16 +545,21 @@ public class XCQLOPUpdate
      */
     public static int executeUpdate(final XCQL i_XCQL ,final String i_CQL ,Connection i_Conn)
     {
-        boolean v_IsError = false;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("executeUpdate" ,(Object) null);
+        int                 v_IORowCount    = 0;
 
         try
         {
-            return XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,i_CQL ,i_Conn);
+            v_IORowCount = XCQLOPUpdate.executeUpdate_Inner(i_XCQL ,i_CQL ,i_Conn);
+            return v_IORowCount;
         }
         /* try{}已有中捕获所有异常，并仅出外抛出Null和Runtime两种异常。为保持异常类型不变，写了两遍一样的 */
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(i_CQL ,exce ,i_XCQL));
@@ -474,7 +568,8 @@ public class XCQLOPUpdate
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(i_CQL ,exce ,i_XCQL));
@@ -485,7 +580,14 @@ public class XCQLOPUpdate
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes();
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes();
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -566,17 +668,22 @@ public class XCQLOPUpdate
     {
         i_XCQL.checkContent();
         
-        boolean v_IsError = false;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("executeUpdate" ,(Object) null);
+        int                 v_IORowCount    = 0;
 
         try
         {
             i_XCQL.fireBeforeRule(i_ObjList);
-            return XCQLOPUpdate.executeUpdates_Inner(i_XCQL ,i_ObjList ,null);
+            v_IORowCount = XCQLOPUpdate.executeUpdates_Inner(i_XCQL ,i_ObjList ,null);
+            return v_IORowCount;
         }
         /* try{}已有中捕获所有异常，并仅出外抛出Null和Runtime两种异常。为保持异常类型不变，写了两遍一样的 */
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(i_XCQL.getContent().getCQL(i_XCQL.getDataSourceCQL()) ,exce ,i_XCQL).setValuesList(i_ObjList));
@@ -585,7 +692,8 @@ public class XCQLOPUpdate
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(i_XCQL.getContent().getCQL(i_XCQL.getDataSourceCQL()) ,exce ,i_XCQL).setValuesList(i_ObjList));
@@ -596,7 +704,14 @@ public class XCQLOPUpdate
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executeUpdates(i_ObjList);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executeUpdates(i_ObjList);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -627,17 +742,22 @@ public class XCQLOPUpdate
     {
         i_XCQL.checkContent();
         
-        boolean v_IsError = false;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("executeUpdate" ,(Object) null);
+        int                 v_IORowCount    = 0;
 
         try
         {
             i_XCQL.fireBeforeRule(i_ObjList);
-            return XCQLOPUpdate.executeUpdates_Inner(i_XCQL ,i_ObjList ,i_Conn);
+            v_IORowCount = XCQLOPUpdate.executeUpdates_Inner(i_XCQL ,i_ObjList ,i_Conn);
+            return v_IORowCount;
         }
         /* try{}已有中捕获所有异常，并仅出外抛出Null和Runtime两种异常。为保持异常类型不变，写了两遍一样的 */
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(i_XCQL.getContent().getCQL(i_XCQL.getDataSourceCQL()) ,exce ,i_XCQL).setValuesList(i_ObjList));
@@ -646,7 +766,8 @@ public class XCQLOPUpdate
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(i_XCQL.getContent().getCQL(i_XCQL.getDataSourceCQL()) ,exce ,i_XCQL).setValuesList(i_ObjList));
@@ -657,7 +778,14 @@ public class XCQLOPUpdate
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executeUpdates(i_ObjList);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executeUpdates(i_ObjList);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }

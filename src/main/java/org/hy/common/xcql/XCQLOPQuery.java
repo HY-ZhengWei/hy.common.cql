@@ -23,6 +23,7 @@ import org.neo4j.driver.Result;
  * @author      ZhengWei(HY)
  * @createDate  2022-06-04
  * @version     v1.0
+ *              v2.0  2023-10-18  添加：是否附加触发额外参数的功能
  */
 public class XCQLOPQuery
 {
@@ -46,19 +47,25 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryXCQLData" ,(Object) null);
+        long                v_IORowCount    = 0L;
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
             v_DSCQL = i_XCQL.getDataSourceCQL();
             v_CQL = i_XCQL.getContent().getCQL(v_DSCQL);
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL);
+            XCQLData v_Ret = XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL);
+            v_IORowCount = v_Ret.getRowCount();
+            return v_Ret;
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -67,7 +74,8 @@ public class XCQLOPQuery
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -78,7 +86,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes();
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes();
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -99,19 +114,25 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryXCQLData" ,(Object) null);
+        long                v_IORowCount    = 0L;
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
             v_DSCQL = i_XCQL.getDataSourceCQL();
             v_CQL = i_XCQL.getContent().getCQL(v_DSCQL);
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,i_Conn);
+            XCQLData v_Ret = XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,i_Conn);
+            v_IORowCount = v_Ret.getRowCount();
+            return v_Ret;
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -120,7 +141,8 @@ public class XCQLOPQuery
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -131,7 +153,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes();
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes();
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -155,20 +184,26 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryXCQLData" ,i_Values);
+        long                v_IORowCount    = 0L;
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
         
         try
         {
             i_XCQL.fireBeforeRule(i_Values);
             v_DSCQL = i_XCQL.getDataSourceCQL();
             v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL);
+            XCQLData v_Ret = XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL);
+            v_IORowCount = v_Ret.getRowCount();
+            return v_Ret;
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesMap(i_Values));
@@ -177,7 +212,8 @@ public class XCQLOPQuery
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesMap(i_Values));
@@ -188,7 +224,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes(i_Values);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes(i_Values);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -213,20 +256,26 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryXCQLData" ,i_Values);
+        long                v_IORowCount    = 0L;
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
         
         try
         {
             i_XCQL.fireBeforeRule(i_Values);
             v_DSCQL = i_XCQL.getDataSourceCQL();
             v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,i_Conn);
+            XCQLData v_Ret = XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,i_Conn);
+            v_IORowCount = v_Ret.getRowCount();
+            return v_Ret;
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesMap(i_Values));
@@ -235,7 +284,8 @@ public class XCQLOPQuery
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesMap(i_Values));
@@ -246,7 +296,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes(i_Values);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes(i_Values);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -256,46 +313,53 @@ public class XCQLOPQuery
     /**
      * 占位符CQL的查询。
      * 
-     * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
+     * 1. 按对象 i_Values 填充占位符CQL，生成可执行的CQL语句；
      * 2. 并提交数据库执行CQL，将数据库结果集转化为Java实例对象返回
      * 
      * @author      ZhengWei(HY)
      * @createDate  2019-03-22
      * @version     v1.0
      * 
-     * @param i_Obj              占位符CQL的填充对象。
+     * @param i_Values              占位符CQL的填充对象。
      * @return
      */
-    public static XCQLData queryXCQLData(final XCQL i_XCQL ,final Object i_Obj)
+    public static XCQLData queryXCQLData(final XCQL i_XCQL ,final Object i_Values)
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryXCQLData" ,i_Values);
+        long                v_IORowCount    = 0L;
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
-            i_XCQL.fireBeforeRule(i_Obj);
+            i_XCQL.fireBeforeRule(i_Values);
             v_DSCQL = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(i_Obj ,v_DSCQL);
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL);
+            v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
+            XCQLData v_Ret = XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL);
+            v_IORowCount = v_Ret.getRowCount();
+            return v_Ret;
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
-                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Obj));
+                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Values));
             }
             throw exce;
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
-                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Obj));
+                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Values));
             }
             throw exce;
         }
@@ -303,7 +367,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes(i_Obj);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes(i_Values);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -313,47 +384,54 @@ public class XCQLOPQuery
     /**
      * 占位符CQL的查询。（内部不再关闭数据库连接）
      * 
-     * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
+     * 1. 按对象 i_Values 填充占位符CQL，生成可执行的CQL语句；
      * 2. 并提交数据库执行CQL，将数据库结果集转化为Java实例对象返回
      * 
      * @author      ZhengWei(HY)
      * @createDate  2019-03-22
      * @version     v1.0
      * 
-     * @param i_Obj              占位符CQL的填充对象。
+     * @param i_Values              占位符CQL的填充对象。
      * @param i_Conn
      * @return
      */
-    public static XCQLData queryXCQLData(final XCQL i_XCQL ,final Object i_Obj ,final Connection i_Conn)
+    public static XCQLData queryXCQLData(final XCQL i_XCQL ,final Object i_Values ,final Connection i_Conn)
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryXCQLData" ,i_Values);
+        long                v_IORowCount    = 0L;
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
-            i_XCQL.fireBeforeRule(i_Obj);
+            i_XCQL.fireBeforeRule(i_Values);
             v_DSCQL = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(i_Obj ,v_DSCQL);
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,i_Conn);
+            v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
+            XCQLData v_Ret = XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,i_Conn);
+            v_IORowCount = v_Ret.getRowCount();
+            return v_Ret;
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
-                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Obj));
+                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Values));
             }
             throw exce;
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
-                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Obj));
+                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Values));
             }
             throw exce;
         }
@@ -361,7 +439,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes(i_Obj);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes(i_Values);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -384,15 +469,21 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean v_IsError = false;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryXCQLData" ,(Object) null);
+        long                v_IORowCount    = 0L;
 
         try
         {
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,i_CQL ,i_Conn);
+            XCQLData v_Ret = XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,i_CQL ,i_Conn);
+            v_IORowCount = v_Ret.getRowCount();
+            return v_Ret;
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(i_CQL ,exce ,i_XCQL));
@@ -401,7 +492,8 @@ public class XCQLOPQuery
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(i_CQL ,exce ,i_XCQL));
@@ -412,7 +504,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger();
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes();
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -435,15 +534,21 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean v_IsError = false;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryXCQLData" ,(Object) null);
+        long                v_IORowCount    = 0L;
 
         try
         {
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,i_CQL ,i_XCQL.getDataSourceCQL());
+            XCQLData v_Ret = XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,i_CQL ,i_XCQL.getDataSourceCQL());
+            v_IORowCount = v_Ret.getRowCount();
+            return v_Ret;
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(i_CQL ,exce ,i_XCQL));
@@ -452,7 +557,8 @@ public class XCQLOPQuery
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(i_CQL ,exce ,i_XCQL));
@@ -463,7 +569,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger();
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes();
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -543,19 +656,25 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryXCQLData" ,(Object) null);
+        long                v_IORowCount    = 0L;
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
             v_DSCQL = i_XCQL.getDataSourceCQL();
             v_CQL = i_XCQL.getContent().getCQL(v_DSCQL);
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL ,i_StartRow ,i_PagePerSize);
+            XCQLData v_Ret = XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL ,i_StartRow ,i_PagePerSize);
+            v_IORowCount = v_Ret.getRowCount();
+            return v_Ret;
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -564,7 +683,8 @@ public class XCQLOPQuery
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -575,7 +695,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes();
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes();
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -601,20 +728,26 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryXCQLData" ,i_Values);
+        long                v_IORowCount    = 0L;
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
             i_XCQL.fireBeforeRule(i_Values);
             v_DSCQL = i_XCQL.getDataSourceCQL();
             v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL ,i_StartRow ,i_PagePerSize);
+            XCQLData v_Ret = XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL ,i_StartRow ,i_PagePerSize);
+            v_IORowCount = v_Ret.getRowCount();
+            return v_Ret;
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesMap(i_Values));
@@ -623,7 +756,8 @@ public class XCQLOPQuery
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesMap(i_Values));
@@ -634,7 +768,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes(i_Values);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes(i_Values);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -651,41 +792,48 @@ public class XCQLOPQuery
      * @createDate  2019-03-22
      * @version     v1.0
      * 
-     * @param i_Obj              占位符CQL的填充对象。
+     * @param i_Values              占位符CQL的填充对象。
      * @param i_StartRow         开始读取的行号。下标从0开始。
      * @param i_PagePerSize      每页显示多少条数据。只有大于0时，游标分页功能才生效。
      * @return
      */
-    public static XCQLData queryXCQLData(final XCQL i_XCQL ,final Object i_Obj ,final int i_StartRow ,final int i_PagePerSize)
+    public static XCQLData queryXCQLData(final XCQL i_XCQL ,final Object i_Values ,final int i_StartRow ,final int i_PagePerSize)
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryXCQLData" ,i_Values);
+        long                v_IORowCount    = 0L;
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
-            i_XCQL.fireBeforeRule(i_Obj);
+            i_XCQL.fireBeforeRule(i_Values);
             v_DSCQL = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(i_Obj ,v_DSCQL);
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL ,i_StartRow ,i_PagePerSize);
+            v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
+            XCQLData v_Ret = XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,v_CQL ,v_DSCQL ,i_StartRow ,i_PagePerSize);
+            v_IORowCount = v_Ret.getRowCount();
+            return v_Ret;
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
-                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Obj));
+                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Values));
             }
             throw exce;
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
-                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Obj));
+                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Values));
             }
             throw exce;
         }
@@ -693,7 +841,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes(i_Obj);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes(i_Values);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -718,17 +873,23 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryXCQLData" ,(Object) null);
+        long                v_IORowCount    = 0L;
+        DataSourceCQL       v_DSCQL         = null;
         
         try
         {
             v_DSCQL = i_XCQL.getDataSourceCQL();
-            return XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,i_CQL ,v_DSCQL ,i_StartRow ,i_PagePerSize);
+            XCQLData v_Ret = XCQLOPQuery.queryXCQLData_Inner(i_XCQL ,i_CQL ,v_DSCQL ,i_StartRow ,i_PagePerSize);
+            v_IORowCount = v_Ret.getRowCount();
+            return v_Ret;
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(i_CQL ,exce ,i_XCQL));
@@ -737,7 +898,8 @@ public class XCQLOPQuery
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(i_CQL ,exce ,i_XCQL));
@@ -748,7 +910,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes();
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes();
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IORowCount ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -893,9 +1062,11 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryCQLCount" ,i_Values);
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
@@ -906,7 +1077,8 @@ public class XCQLOPQuery
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesMap(i_Values));
@@ -915,7 +1087,8 @@ public class XCQLOPQuery
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesMap(i_Values));
@@ -926,7 +1099,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes(i_Values);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes(i_Values);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IsError?0L:1L ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -938,43 +1118,47 @@ public class XCQLOPQuery
      * 
      * 模块CQL的形式如：SELECT COUNT(1) FROM ...
      * 
-     * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
+     * 1. 按对象 i_Values 填充占位符CQL，生成可执行的CQL语句；
      * 2. 并提交数据库执行CQL，将数据库结果集转化为Java实例对象返回
      * 
-     * @param i_XCQL  查询对象
-     * @param i_Obj   占位符CQL的填充对象。
+     * @param i_XCQL     查询对象
+     * @param i_Values   占位符CQL的填充对象。
      * @return
      */
-    public static long queryCQLCount(final XCQL i_XCQL ,final Object i_Obj)
+    public static long queryCQLCount(final XCQL i_XCQL ,final Object i_Values)
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryCQLCount" ,i_Values);
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
-            i_XCQL.fireBeforeRule(i_Obj);
+            i_XCQL.fireBeforeRule(i_Values);
             v_DSCQL = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(i_Obj ,v_DSCQL);
+            v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
             return XCQLOPQuery.queryCQLCount_Inner(i_XCQL ,v_CQL ,v_DSCQL);
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
-                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Obj));
+                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Values));
             }
             throw exce;
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
-                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Obj));
+                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Values));
             }
             throw exce;
         }
@@ -982,7 +1166,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes(i_Obj);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes(i_Values);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IsError?0L:1L ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -1001,9 +1192,11 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryCQLCount" ,(Object) null);
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
@@ -1013,7 +1206,8 @@ public class XCQLOPQuery
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -1022,7 +1216,8 @@ public class XCQLOPQuery
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -1033,7 +1228,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes();
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes();
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IsError?0L:1L ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -1053,9 +1255,11 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryCQLCount" ,(Object) null);
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
@@ -1065,7 +1269,8 @@ public class XCQLOPQuery
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -1074,7 +1279,8 @@ public class XCQLOPQuery
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -1085,7 +1291,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes();
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes();
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IsError?0L:1L ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -1192,9 +1405,11 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryCQLValue" ,i_Values);
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
@@ -1205,7 +1420,8 @@ public class XCQLOPQuery
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesMap(i_Values));
@@ -1214,7 +1430,8 @@ public class XCQLOPQuery
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesMap(i_Values));
@@ -1225,7 +1442,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes(i_Values);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes(i_Values);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IsError?0L:1L ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -1235,48 +1459,52 @@ public class XCQLOPQuery
     /**
      * 查询返回第一行第一列上的数值。常用于查询返回一个字符串
      * 
-     * 1. 按对象 i_Obj 填充占位符CQL，生成可执行的CQL语句；
+     * 1. 按对象 i_Values 填充占位符CQL，生成可执行的CQL语句；
      * 2. 并提交数据库执行CQL，将数据库结果集转化为Java实例对象返回
      * 
      * @author      ZhengWei(HY)
      * @createDate  2023-03-07
      * @version     v1.0
      * 
-     * @param i_XCQL  查询对象
-     * @param i_Obj   占位符CQL的填充对象。
+     * @param i_XCQL     查询对象
+     * @param i_Values   占位符CQL的填充对象。
      * @return
      * @throws Exception
      */
-    public static Object queryCQLValue(final XCQL i_XCQL ,final Object i_Obj)
+    public static Object queryCQLValue(final XCQL i_XCQL ,final Object i_Values)
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryCQLValue" ,i_Values);
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
-            i_XCQL.fireBeforeRule(i_Obj);
+            i_XCQL.fireBeforeRule(i_Values);
             v_DSCQL = i_XCQL.getDataSourceCQL();
-            v_CQL = i_XCQL.getContent().getCQL(i_Obj ,v_DSCQL);
+            v_CQL = i_XCQL.getContent().getCQL(i_Values ,v_DSCQL);
             return XCQLOPQuery.queryCQLValue_Inner(i_XCQL ,v_CQL ,v_DSCQL);
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
-                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Obj));
+                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Values));
             }
             throw exce;
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
-                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Obj));
+                i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL).setValuesObject(i_Values));
             }
             throw exce;
         }
@@ -1284,7 +1512,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes(i_Obj);
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes(i_Values);
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IsError?0L:1L ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -1305,9 +1540,11 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryCQLValue" ,(Object) null);
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
@@ -1317,7 +1554,8 @@ public class XCQLOPQuery
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -1326,7 +1564,8 @@ public class XCQLOPQuery
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -1337,7 +1576,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes();
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes();
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IsError?0L:1L ,v_ErrorInfo));
+                }
             }
         }
     }
@@ -1359,9 +1605,11 @@ public class XCQLOPQuery
     {
         i_XCQL.checkContent();
         
-        boolean       v_IsError = false;
-        DataSourceCQL v_DSCQL   = null;
-        String        v_CQL     = null;
+        boolean             v_IsError       = false;
+        String              v_ErrorInfo     = null;
+        Map<String ,Object> v_TriggerParams = i_XCQL.executeBeforeForTrigger("queryCQLValue" ,(Object) null);
+        DataSourceCQL       v_DSCQL         = null;
+        String              v_CQL           = null;
 
         try
         {
@@ -1371,7 +1619,8 @@ public class XCQLOPQuery
         }
         catch (NullPointerException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -1380,7 +1629,8 @@ public class XCQLOPQuery
         }
         catch (RuntimeException exce)
         {
-            v_IsError = true;
+            v_IsError   = true;
+            v_ErrorInfo = Help.NVL(exce.getMessage() ,"E");
             if ( i_XCQL.getError() != null )
             {
                 i_XCQL.getError().errorLog(new XCQLErrorInfo(v_CQL ,exce ,i_XCQL));
@@ -1391,7 +1641,14 @@ public class XCQLOPQuery
         {
             if ( i_XCQL.isTriggers(v_IsError) )
             {
-                i_XCQL.getTrigger().executes();
+                if ( v_TriggerParams == null )
+                {
+                    i_XCQL.getTrigger().executes();
+                }
+                else
+                {
+                    i_XCQL.getTrigger().executes(i_XCQL.executeAfterForTrigger(v_TriggerParams ,v_IsError?0L:1L ,v_ErrorInfo));
+                }
             }
         }
     }

@@ -1,6 +1,6 @@
-Manifest-Version: 1.0.3
+Manifest-Version: 1.0.4
 Created-By: HY.ZhengWei@qq.com  2023
-Specification-Version: 1.0.3  2023-11-16
+Specification-Version: 1.0.4  2023-11-16
 SourceCode: https://github.com/HY-ZhengWei/hy.common.xcql
 SourceCodeChina: https://gitee.com/HY-ZhengWei/hy.common.xcql
 Build-JDK: 11

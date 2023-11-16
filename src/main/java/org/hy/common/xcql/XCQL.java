@@ -2369,7 +2369,7 @@ public final class XCQL extends AnalyseTotal implements Comparable<XCQL> ,XJavaI
             }
             
             v_Params.put($Trigger_SourceID    ,this.getObjectID());
-            v_Params.put($Trigger_SourceXID   ,this.getObjectID());
+            v_Params.put($Trigger_SourceXID   ,this.getXJavaID());
             v_Params.put($Trigger_StartTime   ,new Date());
             v_Params.put($Trigger_ExecuteType ,i_ExecuteType);
         }

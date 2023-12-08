@@ -6,7 +6,7 @@
 
     <groupId>org</groupId>
     <artifactId>hy.common.xcql</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <packaging>jar</packaging>
 
     <name>cn.openapis.hy.common.xcql</name>
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>cn.openapis</groupId>
             <artifactId>hy.common.base</artifactId>
-            <version>1.0.172</version>
+            <version>1.0.174</version>
             <scope>provided</scope>
         </dependency>
         
@@ -89,7 +89,7 @@
         <dependency>
             <groupId>cn.openapis</groupId>
             <artifactId>hy.common.xjava</artifactId>
-            <version>4.4.2</version>
+            <version>4.4.3</version>
             <scope>test</scope>
         </dependency>
 

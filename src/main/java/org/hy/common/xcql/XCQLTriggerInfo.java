@@ -35,8 +35,19 @@ public class XCQLTriggerInfo
     {
         return xcql;
     }
-
     
+    
+    /**
+     * 设置：XCQL对象
+     * 
+     * @param i_Xcql XCQL对象
+     */
+    public void setXcql(XCQL i_Xcql)
+    {
+        this.xcql = i_Xcql;
+    }
+
+
     /**
      * 获取：执行类型（0按execute方法执行，1按executeUpdate方法执行）
      */

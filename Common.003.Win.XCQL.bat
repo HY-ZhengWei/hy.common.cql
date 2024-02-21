@@ -27,3 +27,5 @@ copy hy.common.xcql-sources.jar ..\..\..
 del /Q hy.common.xcql-sources.jar
 rd /s/q META-INF
 cd ..\..\..
+
+pause
